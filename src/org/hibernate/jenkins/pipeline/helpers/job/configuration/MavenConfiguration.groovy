@@ -8,10 +8,7 @@ package org.hibernate.jenkins.pipeline.helpers.job.configuration
 
 import groovy.transform.PackageScope
 import groovy.transform.PackageScopeTarget
-import groovy.transform.TypeChecked
-import groovy.transform.TypeCheckingMode
 
-@TypeChecked
 @PackageScope([PackageScopeTarget.CONSTRUCTORS, PackageScopeTarget.FIELDS, PackageScopeTarget.METHODS])
 class MavenConfiguration {
 	private final def script
@@ -20,7 +17,6 @@ class MavenConfiguration {
 	private String defaultTool
 	private List<String> producedArtifactPatterns = []
 
-	@TypeChecked(TypeCheckingMode.SKIP)
 	MavenConfiguration(def script) {
 		this.script = script
 		localRepositoryRelativePath = ".repository"
@@ -56,7 +52,6 @@ class MavenConfiguration {
 		return new DSLElement()
 	}
 
-	@TypeChecked
 	@PackageScope([PackageScopeTarget.CONSTRUCTORS])
 	public class DSLElement {
 		DSLElement() {

@@ -8,11 +8,9 @@ package org.hibernate.jenkins.pipeline.helpers.job.configuration
 
 import groovy.transform.PackageScope
 import groovy.transform.PackageScopeTarget
-import groovy.transform.TypeChecked
 import org.hibernate.jenkins.pipeline.helpers.scm.ScmSource
 import org.hibernate.jenkins.pipeline.helpers.util.DslUtils
 
-@TypeChecked
 @PackageScope([PackageScopeTarget.CONSTRUCTORS, PackageScopeTarget.FIELDS, PackageScopeTarget.METHODS])
 class JobConfiguration {
 	final JdkConfiguration jdk
@@ -40,7 +38,6 @@ class JobConfiguration {
 		tracking.complete(file)
 	}
 
-	@TypeChecked
 	@PackageScope([PackageScopeTarget.CONSTRUCTORS])
 	public class DSLElement {
 		private DSLElement() {

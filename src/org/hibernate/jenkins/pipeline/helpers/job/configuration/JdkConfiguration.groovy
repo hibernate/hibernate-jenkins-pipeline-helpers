@@ -8,9 +8,7 @@ package org.hibernate.jenkins.pipeline.helpers.job.configuration
 
 import groovy.transform.PackageScope
 import groovy.transform.PackageScopeTarget
-import groovy.transform.TypeChecked
 
-@TypeChecked
 @PackageScope([PackageScopeTarget.CONSTRUCTORS, PackageScopeTarget.FIELDS, PackageScopeTarget.METHODS])
 class JdkConfiguration {
 	private String defaultTool
@@ -33,7 +31,6 @@ class JdkConfiguration {
 		return new DSLElement()
 	}
 
-	@TypeChecked
 	@PackageScope([PackageScopeTarget.CONSTRUCTORS])
 	public class DSLElement {
 		private DSLElement() {

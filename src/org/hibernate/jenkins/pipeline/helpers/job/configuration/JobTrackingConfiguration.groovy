@@ -8,11 +8,8 @@ package org.hibernate.jenkins.pipeline.helpers.job.configuration
 
 import groovy.transform.PackageScope
 import groovy.transform.PackageScopeTarget
-import groovy.transform.TypeChecked
-import groovy.transform.TypeCheckingMode
 import org.hibernate.jenkins.pipeline.helpers.scm.ScmSource
 
-@TypeChecked
 @PackageScope([PackageScopeTarget.CONSTRUCTORS, PackageScopeTarget.FIELDS, PackageScopeTarget.METHODS])
 class JobTrackingConfiguration {
 	private final def script
@@ -40,7 +37,6 @@ class JobTrackingConfiguration {
 		fileSection
 	}
 
-	@TypeChecked(TypeCheckingMode.SKIP)
 	void complete(def configFile) {
 		if (scmSource.branch.tracking) {
 			this.id = scmSource.branch.tracking
