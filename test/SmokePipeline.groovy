@@ -54,7 +54,7 @@ def execute() {
 				)
 		])
 
-		environments.each { key, envList ->
+		environments.all.each { key, envList ->
 			envList.removeAll { itEnv -> itEnv.isDefault() }
 		}
 

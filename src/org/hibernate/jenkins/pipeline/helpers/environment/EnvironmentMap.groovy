@@ -7,8 +7,7 @@
 package org.hibernate.jenkins.pipeline.helpers.environment
 
 class EnvironmentMap {
-	@Delegate
-	private final Map<String, List<?>> all
+	final Map<String, List<?>> all
 
 	final Map<String, ?> defaults
 
