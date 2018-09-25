@@ -120,6 +120,8 @@ This apparently has to do with the transformations the interpreter applies to me
 so that they can be executed as "continuations", which requires transformations on both
 the declaration site and call site in order to work.
 Constructors are not transformed, so they can't call such transformed methods.
+- `.with` cannot be used, because it requires to use reflection,
+which is disallowed in Jenkinsfile, probably because it would allow to bypass the sandbox. 
 - Nested classes support is quite bad.
 In particular, [you cannot reference an inner class (ParentClass.NestedClass) from another class](https://issues.jenkins-ci.org/browse/JENKINS-41896).
 - Behavioral annotations such as `@Delegate`, `@Immutable`, etc. are unlikely to work.

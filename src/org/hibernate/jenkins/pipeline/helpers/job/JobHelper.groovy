@@ -62,16 +62,14 @@ class JobHelper {
 	}
 
 	def loadYamlConfiguration(String yamlConfigFileId) {
-		script.with {
-			try {
-				configFileProvider([configFile(fileId: yamlConfigFileId, variable: "FILE_PATH")]) {
-					return readYaml(file: FILE_PATH)
-				}
+		try {
+			script.configFileProvider([script.configFile(fileId: yamlConfigFileId, variable: "FILE_PATH")]) {
+				return script.readYaml(file: script.FILE_PATH)
 			}
-			catch (Exception e) {
-				echo "Failed to load configuration file '$yamlConfigFileId'; assuming empty file. Exception was: $e"
-				return [:]
-			}
+		}
+		catch (Exception e) {
+			script.echo "Failed to load configuration file '$yamlConfigFileId'; assuming empty file. Exception was: $e"
+			return [:]
 		}
 	}
 
@@ -82,9 +80,7 @@ class JobHelper {
 	}
 
 	void markStageSkipped() {
-		script.with {
-			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional(STAGE_NAME)
-		}
+		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional(script.STAGE_NAME)
 	}
 
 	void withMavenWorkspace(Closure body) {
@@ -94,13 +90,11 @@ class JobHelper {
 	void withMavenWorkspace(Map args, Closure body) {
 		checkConfigured()
 		initWorkspace()
-		script.with {
-			args.putIfAbsent('jdk', configuration.jdk.defaultTool)
-			args.putIfAbsent('maven', configuration.maven.defaultTool)
-			args.putIfAbsent('options', [artifactsPublisher(disabled: true)])
-			args.putIfAbsent('mavenLocalRepo', configuration.maven.localRepositoryPath)
-			withMaven(args, body)
-		}
+		args.putIfAbsent('jdk', configuration.jdk.defaultTool)
+		args.putIfAbsent('maven', configuration.maven.defaultTool)
+		args.putIfAbsent('options', [script.artifactsPublisher(disabled: true)])
+		args.putIfAbsent('mavenLocalRepo', configuration.maven.localRepositoryPath)
+		script.withMaven(args, body)
 	}
 
 	private void checkConfigured() {
@@ -115,93 +109,90 @@ class JobHelper {
 	private void initWorkspace() {
 		checkConfigured()
 
-		script.with {
-			def maven = configuration.maven
+		def maven = configuration.maven
 
-			if (maven.producedArtifactPatterns) {
-				/*
-				 * Remove our own artifacts from the local Maven repository,
-				 * because they might have been created by another build executed on the same node,
-				 * and thus might result from a different revision of the source code.
-				 * We copy the built artifacts from one stage to another explicitly when necessary; see resumeFromDefaultBuild().
-				 */
-				cleanWs(
-						deleteDirs: true,
-						patterns: maven.producedArtifactPatterns.collect(
-								{ pattern -> [type: 'INCLUDE', pattern: "$maven.localRepositoryPath/$pattern"] }
-						)
-				)
-			}
-
+		if (maven.producedArtifactPatterns) {
 			/*
-			 * Remove everything unless we know it's safe, to prevent previous builds from interfering with the current build.
-			 * Keep the local Maven repository and Git metadata, since they may be reused safely.
+			 * Remove our own artifacts from the local Maven repository,
+			 * because they might have been created by another build executed on the same node,
+			 * and thus might result from a different revision of the source code.
+			 * We copy the built artifacts from one stage to another explicitly when necessary; see resumeFromDefaultBuild().
 			 */
-			cleanWs(deleteDirs: true, patterns: [
-					// The Maven repository is safe, we cleaned it up just above
-					[type: 'EXCLUDE', pattern: "$maven.localRepositoryPath/**"],
-					// The Git metadata is safe, we check out the correct branch just below
-					[type: 'EXCLUDE', pattern: ".git/**"]
-			])
+			script.cleanWs(
+					deleteDirs: true,
+					patterns: maven.producedArtifactPatterns.collect(
+							{ pattern -> [type: 'INCLUDE', pattern: "$maven.localRepositoryPath/$pattern"] }
+					)
+			)
+		}
 
-			// Check out the code
-			checkout scm
+		/*
+		 * Remove everything unless we know it's safe, to prevent previous builds from interfering with the current build.
+		 * Keep the local Maven repository and Git metadata, since they may be reused safely.
+		 */
+		script.cleanWs(deleteDirs: true, patterns: [
+				// The Maven repository is safe, we cleaned it up just above
+				[type: 'EXCLUDE', pattern: "$maven.localRepositoryPath/**"],
+				// The Git metadata is safe, we check out the correct branch just below
+				[type: 'EXCLUDE', pattern: ".git/**"]
+		])
 
-			// Take tracking configuration into account
-			String base = configuration.tracking.fileSection?.base
-			if (base) {
-				// Add the configured remotes, just in case the "base" references one of these
-				if (configuration.file?.scm?.remotes) {
-					def remotesConfiguration = configuration.file.scm.remotes
-					echo "Adding configured remotes"
-					remotesConfiguration.each { remoteName, remoteConfig ->
-						// Remove the remote if it was added in a previous build
-						sh "git remote remove '$remoteName' 1>&2 2>/dev/null || true"
-						sh "git remote add -f '$remoteName' '$remoteConfig.url'"
-					}
+		// Check out the code
+		script.checkout script.scm
+
+		// Take tracking configuration into account
+		String base = configuration.tracking.fileSection?.base
+		if (base) {
+			// Add the configured remotes, just in case the "base" references one of these
+			if (configuration.file?.scm?.remotes) {
+				def remotesConfiguration = configuration.file.scm.remotes
+				script.echo "Adding configured remotes"
+				remotesConfiguration.each { remoteName, remoteConfig ->
+					// Remove the remote if it was added in a previous build
+					script.sh "git remote remove '$remoteName' 1>&2 2>/dev/null || true"
+					script.sh "git remote add -f '$remoteName' '$remoteConfig.url'"
 				}
-				echo "Merging with tracking base: $base"
-				sh "git merge $base"
 			}
+			script.echo "Merging with tracking base: $base"
+			script.sh "git merge $base"
 		}
 	}
 
 	private void notifyBuildEnd() {
-		script.with {
-			boolean success = currentBuild.result == 'SUCCESS'
-			boolean successAfterSuccess = success &&
-					currentBuild.previousBuild != null && currentBuild.previousBuild.result == 'SUCCESS'
+		def currentBuild = script.currentBuild
+		boolean success = currentBuild.result == 'SUCCESS'
+		boolean successAfterSuccess = success &&
+				currentBuild.previousBuild != null && currentBuild.previousBuild.result == 'SUCCESS'
 
-			String explicitRecipients = null
+		String explicitRecipients = null
 
-			// Always notify people who explicitly requested a build
-			def recipientProviders = [requestor()]
+		// Always notify people who explicitly requested a build
+		def recipientProviders = [script.requestor()]
 
-			// In case of failure, notify all the people who committed a change since the last non-broken build
-			if (!success) {
-				echo "Notification recipients: adding culprits()"
-				recipientProviders.add(culprits())
-			}
-			// Always notify the author of the changeset, except in the case of a "success after a success"
-			if (!successAfterSuccess) {
-				echo "Notification recipients: adding developers()"
-				recipientProviders.add(developers())
-			}
-
-			// Notify the notification recipients configured on the job,
-			// except in the case of a non-tracking PR build or of a "success after a success"
-			if ((!scmSource.pullRequest || scmSource.branch.tracking) && !successAfterSuccess) {
-				explicitRecipients = configuration.file?.notification?.email?.recipients
-			}
-
-			// See https://plugins.jenkins.io/email-ext#Email-extplugin-PipelineExamples
-			emailext(
-					subject: '${DEFAULT_SUBJECT}',
-					body: '${DEFAULT_CONTENT}',
-					recipientProviders: recipientProviders,
-					to: explicitRecipients
-			)
+		// In case of failure, notify all the people who committed a change since the last non-broken build
+		if (!success) {
+			script.echo "Notification recipients: adding culprits()"
+			recipientProviders.add(script.culprits())
 		}
+		// Always notify the author of the changeset, except in the case of a "success after a success"
+		if (!successAfterSuccess) {
+			script.echo "Notification recipients: adding developers()"
+			recipientProviders.add(script.developers())
+		}
+
+		// Notify the notification recipients configured on the job,
+		// except in the case of a non-tracking PR build or of a "success after a success"
+		if ((!scmSource.pullRequest || scmSource.branch.tracking) && !successAfterSuccess) {
+			explicitRecipients = configuration.file?.notification?.email?.recipients
+		}
+
+		// See https://plugins.jenkins.io/email-ext#Email-extplugin-PipelineExamples
+		script.emailext(
+				subject: '${DEFAULT_SUBJECT}',
+				body: '${DEFAULT_CONTENT}',
+				recipientProviders: recipientProviders,
+				to: explicitRecipients
+		)
 	}
 
 }

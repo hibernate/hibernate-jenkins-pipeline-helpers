@@ -54,11 +54,9 @@ class JobTrackingConfiguration {
 			// (and prepend "/" to reference jobs outside of the multibranch job)
 			trackedAsString = fileSection.tracked?.join(',')
 
-			script.with {
-				echo "This is a tracking branch. Tracking ID: $id." +
-						" Base branch: ${fileSection.base}." +
-						" Tracked Jenkins jobs: $trackedAsString"
-			}
+			script.echo "This is a tracking branch. Tracking ID: $id." +
+					" Base branch: ${fileSection.base}." +
+					" Tracked Jenkins jobs: $trackedAsString"
 		}
 	}
 }
