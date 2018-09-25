@@ -115,6 +115,11 @@ thus testing on Jenkins itself is still necessary.
 
 ### Known limitations
 
+- Constructors should never, ever call a method defined in your Jenkinsfile script.
+This apparently has to do with the transformations the interpreter applies to methods
+so that they can be executed as "continuations", which requires transformations on both
+the declaration site and call site in order to work.
+Constructors are not transformed, so they can't call such transformed methods.
 - Nested classes support is quite bad.
 In particular, [you cannot reference an inner class (ParentClass.NestedClass) from another class](https://issues.jenkins-ci.org/browse/JENKINS-41896).
 - Behavioral annotations such as `@Delegate`, `@Immutable`, etc. are unlikely to work.
@@ -128,3 +133,13 @@ org.jenkinsci.plugins.scriptsecurity.sandbox.RejectedAccessException: Scripts no
 
 Check that the property exists, and that there's no typo.
 The interpreted apparently defaults to using reflection when unknown methods/properties are referenced.
+
+
+```
+hudson.remoting.ProxyException: com.cloudbees.groovy.cps.impl.CpsCallableInvocation
+```
+
+Check that you're not executing a method inside a constructor (see "Known limitations").
+This includes calling methods from field initializers (@Field String myField = someObject.someMethod()).
+
+Move the method execution to the body of the script if necessary.

@@ -14,7 +14,7 @@ import org.hibernate.jenkins.pipeline.helpers.version.Version
 def execute() {
 	JobHelper helper = new JobHelper(this)
 
-	EnvironmentMap environments = new EnvironmentMap([
+	EnvironmentMap environments = EnvironmentMap.create([
 	        jdk: [
 					new StubEnvironment('1', false),
 					new StubEnvironment('2', true),

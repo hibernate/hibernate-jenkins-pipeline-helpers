@@ -11,16 +11,22 @@ class EnvironmentMap {
 
 	final Map<String, ?> defaults
 
-	EnvironmentMap(Map<String, List<?>> all) {
-		this(all, {it -> it.isDefault()})
+	static EnvironmentMap create(Map<String, List<?>> all) {
+		return create(all, {it -> it.isDefault()})
 	}
 
-	EnvironmentMap(Map<String, List<?>> all, Closure defaultPicker) {
-		this.all = all
+	static EnvironmentMap create(Map<String, List<?>> all, Closure defaultPicker) {
 		// Defaults are set before any user modification (environment removals); this is on purpose.
+		Map<String, ?> defaults = [:]
 		all.each { key, envList ->
 			defaults.put(key, envList.find(defaultPicker))
 		}
+		return new EnvironmentMap(all, defaults)
+	}
+
+	private EnvironmentMap(Map<String, List<?>> all, Map<String, ?> defaults) {
+		this.all = all
+		this.defaults = defaults
 	}
 
 	@Override
