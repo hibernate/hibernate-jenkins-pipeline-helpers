@@ -115,7 +115,8 @@ thus testing on Jenkins itself is still necessary.
 
 ### Known limitations
 
-To be completed.
+- Nested classes support is quite bad.
+In particular, [you cannot reference an inner class (ParentClass.NestedClass) from another class](https://issues.jenkins-ci.org/browse/JENKINS-41896).
 
 ### Troubleshooting
 

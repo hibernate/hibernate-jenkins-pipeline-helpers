@@ -28,10 +28,15 @@ class JdkConfiguration {
 		}
 	}
 
+	// Workaround for https://issues.jenkins-ci.org/browse/JENKINS-41896 (which apparently also affects non-static classes)
+	DSLElement dsl() {
+		return new DSLElement()
+	}
+
 	@TypeChecked
 	@PackageScope([PackageScopeTarget.CONSTRUCTORS])
 	public class DSLElement {
-		DSLElement() {
+		private DSLElement() {
 		}
 
 		void defaultTool(String toolName) {

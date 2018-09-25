@@ -43,9 +43,6 @@ class JobConfiguration {
 	@TypeChecked
 	@PackageScope([PackageScopeTarget.CONSTRUCTORS])
 	public class DSLElement {
-		private final JdkConfiguration.DSLElement jdkDsl = new JdkConfiguration.DSLElement(jdk)
-		private final MavenConfiguration.DSLElement mavenDsl = new MavenConfiguration.DSLElement(maven)
-
 		private DSLElement() {
 		}
 
@@ -54,11 +51,11 @@ class JobConfiguration {
 		}
 
 		void jdk(@DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = JdkConfiguration.DSLElement) Closure closure) {
-			DslUtils.delegateTo(Closure.DELEGATE_FIRST, jdkDsl, closure)
+			DslUtils.delegateTo(Closure.DELEGATE_FIRST, jdk.dsl(), closure)
 		}
 
 		void maven(@DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = MavenConfiguration.DSLElement) Closure closure) {
-			DslUtils.delegateTo(Closure.DELEGATE_FIRST, mavenDsl, closure)
+			DslUtils.delegateTo(Closure.DELEGATE_FIRST, maven.dsl(), closure)
 		}
 	}
 }
