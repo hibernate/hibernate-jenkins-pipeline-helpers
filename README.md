@@ -135,6 +135,8 @@ You should just set the delegate of the original closure (`closure.delegate = ..
 because other strategies rely on reflection (GroovyObject.invoke(String, Map)
 or GroovyObject.getProperty(String)), which are not safe to execute in the
 Jenkins sandbox.
+- `java.util.Set` should be avoided, because at least some methods don't work correctly in Jenkins.
+In particular, `removeAll` has no effect whatsoever. `java.util.List` works fine.
 
 
 ### Troubleshooting

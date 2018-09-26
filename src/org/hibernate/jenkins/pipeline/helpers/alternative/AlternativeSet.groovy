@@ -9,7 +9,7 @@ package org.hibernate.jenkins.pipeline.helpers.alternative
 class AlternativeSet<T> {
 
 	static <T> AlternativeSet<T> create(Collection<T> all, Closure defaultPicker) {
-		Set<T> enabled = []
+		List<T> enabled = []
 		enabled.addAll(all)
 
 		// Select the default
@@ -18,10 +18,11 @@ class AlternativeSet<T> {
 		return new AlternativeSet(enabled, defaultAlternative)
 	}
 
-	final Set<T> enabled
+	// Sets are buggy in Jenkins (removeAll doesn't work in particular), so we'll use List...
+	final List<T> enabled
 	private final T default_
 
-	private AlternativeSet(Set<T> enabled, T default_) {
+	private AlternativeSet(List<T> enabled, T default_) {
 		this.enabled = enabled
 		this.default_ = default_
 	}
