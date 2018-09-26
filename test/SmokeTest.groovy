@@ -68,6 +68,11 @@ class SmokeTest extends BasePipelineTest {
 		helper.registerAllowedMethod("snapshotDependencies", [], {String args -> [type: 'snapshotDependencies']})
 		helper.registerAllowedMethod("upstream", [String.class], {String args -> [type: 'issueCommentTrigger', args: args]})
 
+		helper.registerAllowedMethod("emailext", [Map.class], null)
+		helper.registerAllowedMethod("requestor", [], {String args -> [type: 'requestor', args: args]})
+		helper.registerAllowedMethod("culprits", [], {String args -> [type: 'culprits', args: args]})
+		helper.registerAllowedMethod("developers", [], {String args -> [type: 'developers', args: args]})
+
 		binding.setVariable('scm', new GitScmStub())
 		helper.registerAllowedMethod("checkout", [GitScmStub.class], {GitScmStub args -> args})
 

@@ -14,65 +14,67 @@ import org.hibernate.jenkins.pipeline.helpers.version.Version
 def execute() {
 	JobHelper helper = new JobHelper(this)
 
-	AlternativeMultiMap<StubEnvironment> environments = AlternativeMultiMap.create([
-	        jdk: [
-					new StubEnvironment('env1', false),
-					new StubEnvironment('env2', true),
-					new StubEnvironment('env3', false)
-			]
-	])
-
-	stage('Configure') {
-		def loadedFile
-		node() {
-			loadedFile = helper.loadYamlConfiguration('job-configuration.yaml')
-		}
-		helper.configure({
-			file loadedFile
-			maven {
-				defaultTool 'THE Maven default tool'
-				producedArtifactPattern "org/hibernate/search/*"
-				producedArtifactPattern "org/hibernate/hibernate-search*"
-			}
-			jdk {
-				defaultTool environments.content.jdk.default.name
-			}
-		})
-
-		properties([
-				pipelineTriggers(
-						[
-								issueCommentTrigger('.*test this please.*'),
-								// Normally we don't have snapshot dependencies, so this doesn't matter, but some branches do
-								snapshotDependencies()
-						]
-								+ helper.configuration.tracking.trackedAsString ? [
-								// Rebuild when tracked jobs are rebuilt
-								upstream(helper.configuration.tracking.trackedAsString)
-						]
-								: []
-				)
+	helper.runWithNotification {
+		AlternativeMultiMap<StubEnvironment> environments = AlternativeMultiMap.create([
+				jdk: [
+						new StubEnvironment('env1', false),
+						new StubEnvironment('env2', true),
+						new StubEnvironment('env3', false)
+				]
 		])
 
-		environments.content.each { key, envSet ->
-			// No need to re-test default environments, they are already tested as part of the default build
-			envSet.enabled.remove(envSet.default)
-			envSet.enabled.removeAll { env -> "env1" == env.name }
+		stage('Configure') {
+			def loadedFile
+			node() {
+				loadedFile = helper.loadYamlConfiguration('job-configuration.yaml')
+			}
+			helper.configure({
+				file loadedFile
+				maven {
+					defaultTool 'THE Maven default tool'
+					producedArtifactPattern "org/hibernate/search/*"
+					producedArtifactPattern "org/hibernate/hibernate-search*"
+				}
+				jdk {
+					defaultTool environments.content.jdk.default.name
+				}
+			})
+
+			properties([
+					pipelineTriggers(
+							[
+									issueCommentTrigger('.*test this please.*'),
+									// Normally we don't have snapshot dependencies, so this doesn't matter, but some branches do
+									snapshotDependencies()
+							]
+									+ helper.configuration.tracking.trackedAsString ? [
+									// Rebuild when tracked jobs are rebuilt
+									upstream(helper.configuration.tracking.trackedAsString)
+							]
+									: []
+					)
+			])
+
+			environments.content.each { key, envSet ->
+				// No need to re-test default environments, they are already tested as part of the default build
+				envSet.enabled.remove(envSet.default)
+				envSet.enabled.removeAll { env -> "env1" == env.name }
+			}
+
+			echo "Enabled environments: $environments.enabledAsString"
+
+			def releaseVersion = Version.parseReleaseVersion('5.10.2.Final')
+			def developmentVersion = Version.parseDevelopmentVersion('5.10.3-SNAPSHOT')
+
+			echo "Release version: $releaseVersion, family: $releaseVersion.family"
+			echo "Development version: $developmentVersion, family: $developmentVersion.family"
 		}
 
-		echo "Enabled environments: $environments.enabledAsString"
-
-		def releaseVersion = Version.parseReleaseVersion('5.10.2.Final')
-		def developmentVersion = Version.parseDevelopmentVersion('5.10.3-SNAPSHOT')
-
-		echo "Release version: $releaseVersion, family: $releaseVersion.family"
-		echo "Development version: $developmentVersion, family: $developmentVersion.family"
-	}
-
-	stage('Build') {
-		node() {
-			helper.withMavenWorkspace {
-				sh "mvn clean install"
+		stage('Build') {
+			node() {
+				helper.withMavenWorkspace {
+					sh "mvn clean install"
+				}
 			}
 		}
 	}
