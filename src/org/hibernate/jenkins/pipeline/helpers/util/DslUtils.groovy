@@ -16,9 +16,15 @@ class DslUtils {
 
 	// See http://groovy-lang.org/dsls.html#section-delegatesto
 	static void delegateTo(int resolveStrategy, def dslElement, Closure closure) {
-		Closure copy = closure.rehydrate(dslElement, closure.owner, closure.thisObject)
-		copy.resolveStrategy = resolveStrategy
-		copy()
+		/*
+		 * WARNING: In Jenkins, using closure.rehydrate(...) will not work.
+		 * The resulting copy of the closure will execute, but any of its calls to the delegate
+		 * will be silently ignored.
+		 * Thus we just take the dirty path and mutate the original closure.
+		 */
+		closure.delegate = dslElement
+		closure.resolveStrategy = resolveStrategy
+		closure()
 	}
 
 }

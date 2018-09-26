@@ -35,9 +35,6 @@ If not already done, you will need to allow the following calls in <jenkinsUrl>/
 - method hudson.plugins.git.UserRemoteConfig getUrl
 - method java.lang.Throwable addSuppressed java.lang.Throwable
 - new java.util.LinkedHashMap
-- method groovy.lang.Closure getOwner
-- method groovy.lang.Closure getThisObject
-- method groovy.lang.Closure rehydrate java.lang.Object java.lang.Object java.lang.Object
 
 Just run the script a few times, it will fail and logs will display a link to allow these calls.
 
@@ -126,6 +123,11 @@ which is disallowed in Jenkinsfile, probably because it would allow to bypass th
 In particular, [you cannot reference an inner class (ParentClass.NestedClass) from another class](https://issues.jenkins-ci.org/browse/JENKINS-41896).
 - Behavioral annotations such as `@Delegate`, `@Immutable`, etc. are unlikely to work.
 - Static type checking (@TypeChecked) is not recommended since it will cause cryptic errors.
+- Closure support is limited.
+In particular, `closure.rehydrate(...)` will not work. 
+The resulting copy of the closure will execute, but any of its calls to
+will be silently ignored.
+You should just set the delegate of the original closure (`closure.delegate = ...`).
 
 ### Troubleshooting
 
