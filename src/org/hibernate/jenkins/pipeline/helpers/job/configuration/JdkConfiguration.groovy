@@ -28,16 +28,23 @@ class JdkConfiguration {
 
 	// Workaround for https://issues.jenkins-ci.org/browse/JENKINS-41896 (which apparently also affects non-static classes)
 	DSLElement dsl() {
-		return new DSLElement()
+		return new DSLElement(this)
 	}
 
+	/*
+	 * WARNING: this class must be static, because inner classes don't work well in Jenkins.
+	 * "Qualified this" in particular doesn't work.
+	 */
 	@PackageScope([PackageScopeTarget.CONSTRUCTORS])
-	public class DSLElement {
-		private DSLElement() {
+	public static class DSLElement {
+		private final JdkConfiguration configuration
+
+		private DSLElement(JdkConfiguration configuration) {
+			this.configuration = configuration
 		}
 
 		void defaultTool(String toolName) {
-			defaultTool = toolName
+			configuration.defaultTool = toolName
 		}
 	}
 }

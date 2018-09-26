@@ -30,7 +30,7 @@ class JobConfiguration {
 	}
 
 	public void setup(@DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = DSLElement) Closure closure) {
-		DSLElement dslElement = new DSLElement()
+		DSLElement dslElement = new DSLElement(this)
 		DslUtils.delegateTo(Closure.DELEGATE_FIRST, dslElement, closure)
 
 		jdk.complete()
@@ -38,21 +38,28 @@ class JobConfiguration {
 		tracking.complete(file)
 	}
 
+	/*
+	 * WARNING: this class must be static, because inner classes don't work well in Jenkins.
+	 * "Qualified this" in particular doesn't work.
+	 */
 	@PackageScope([PackageScopeTarget.CONSTRUCTORS])
-	public class DSLElement {
-		private DSLElement() {
+	public static class DSLElement {
+		private final JobConfiguration configuration
+
+		private DSLElement(JobConfiguration configuration) {
+			this.configuration = configuration
 		}
 
 		void file(def file) {
-			JobConfiguration.this.file = file
+			configuration.file = file
 		}
 
 		void jdk(@DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = JdkConfiguration.DSLElement) Closure closure) {
-			DslUtils.delegateTo(Closure.DELEGATE_FIRST, jdk.dsl(), closure)
+			DslUtils.delegateTo(Closure.DELEGATE_FIRST, configuration.jdk.dsl(), closure)
 		}
 
 		void maven(@DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = MavenConfiguration.DSLElement) Closure closure) {
-			DslUtils.delegateTo(Closure.DELEGATE_FIRST, maven.dsl(), closure)
+			DslUtils.delegateTo(Closure.DELEGATE_FIRST, configuration.maven.dsl(), closure)
 		}
 	}
 }
