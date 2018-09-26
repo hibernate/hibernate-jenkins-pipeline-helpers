@@ -110,6 +110,8 @@ which can be helpful when debugging.
 Be aware that the tests don't replicate a full Jenkins environment (no sandboxing in particular),
 thus testing on Jenkins itself is still necessary.
 
+To release changes: `mvn release:prepare && mvn release:perform`
+
 ### Known limitations
 
 - Constructors should never, ever call a method defined in your Jenkinsfile script.

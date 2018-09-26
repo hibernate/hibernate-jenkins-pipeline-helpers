@@ -41,3 +41,7 @@ atlassian-ide-plugin.xml
 # Maven wrapper files
 .mvn
 mvnw*
+
+# Maven-release-plugin
+/release.properties
+pom.xml.releaseBackup
