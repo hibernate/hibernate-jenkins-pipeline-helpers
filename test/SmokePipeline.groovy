@@ -8,17 +8,17 @@
 import com.lesfurets.jenkins.unit.global.lib.Library
 @Library('hibernate-jenkins-pipeline-helpers@master')
 import org.hibernate.jenkins.pipeline.helpers.job.JobHelper
-import org.hibernate.jenkins.pipeline.helpers.environment.EnvironmentMap
+import org.hibernate.jenkins.pipeline.helpers.alternative.AlternativeMultiMap
 import org.hibernate.jenkins.pipeline.helpers.version.Version
 
 def execute() {
 	JobHelper helper = new JobHelper(this)
 
-	EnvironmentMap environments = EnvironmentMap.create([
+	AlternativeMultiMap<StubEnvironment> environments = AlternativeMultiMap.create([
 	        jdk: [
-					new StubEnvironment('1', false),
-					new StubEnvironment('2', true),
-					new StubEnvironment('3', false)
+					new StubEnvironment('env1', false),
+					new StubEnvironment('env2', true),
+					new StubEnvironment('env3', false)
 			]
 	])
 
@@ -35,7 +35,7 @@ def execute() {
 				producedArtifactPattern "org/hibernate/hibernate-search*"
 			}
 			jdk {
-				defaultTool environments.defaults.jdk.name
+				defaultTool environments.content.jdk.default.name
 			}
 		})
 
@@ -54,11 +54,13 @@ def execute() {
 				)
 		])
 
-		environments.all.each { key, envList ->
-			envList.removeAll { itEnv -> itEnv.isDefault() }
+		environments.content.each { key, envSet ->
+			// No need to re-test default environments, they are already tested as part of the default build
+			envSet.enabled.remove(envSet.default)
+			envSet.enabled.removeAll { env -> "env1" == env.name }
 		}
 
-		echo "Enabled environments: $environments"
+		echo "Enabled environments: $environments.enabledAsString"
 
 		def releaseVersion = Version.parseReleaseVersion('5.10.2.Final')
 		def developmentVersion = Version.parseDevelopmentVersion('5.10.3-SNAPSHOT')
