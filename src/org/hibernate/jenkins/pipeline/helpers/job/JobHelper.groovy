@@ -73,7 +73,7 @@ class JobHelper {
 		}
 	}
 
-	void configure(@DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = JobConfiguration.DSLElement) Closure closure) {
+	void configure(@DelegatesTo(JobConfiguration.DSLElement) Closure closure) {
 		script.echo "SCM source: $scmSource"
 		configuration.setup(closure)
 		configured = true

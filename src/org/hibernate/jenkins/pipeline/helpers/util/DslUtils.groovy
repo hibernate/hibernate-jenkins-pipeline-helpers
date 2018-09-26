@@ -15,7 +15,7 @@ class DslUtils {
 	}
 
 	// See http://groovy-lang.org/dsls.html#section-delegatesto
-	static void delegateTo(int resolveStrategy, def dslElement, Closure closure) {
+	static void delegateTo(def dslElement, Closure closure) {
 		/*
 		 * WARNING: In Jenkins, using closure.rehydrate(...) will not work.
 		 * The resulting copy of the closure will execute, but any of its calls to the delegate
@@ -23,7 +23,12 @@ class DslUtils {
 		 * Thus we just take the dirty path and mutate the original closure.
 		 */
 		closure.delegate = dslElement
-		closure.resolveStrategy = resolveStrategy
+		/*
+		 * WARNING: In Jenkins, only the default "resolveStrategy" can be expected to work correctly,
+		 * because other strategies rely on reflection (GroovyObject.invoke(String, Map)
+		 * or GroovyObject.getProperty(String)), which are not safe to execute in the Jenkins sandbox.
+		 * Thus we don't call closure.resolveStrategy = ... here.
+		 */
 		closure()
 	}
 

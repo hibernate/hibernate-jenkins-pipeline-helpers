@@ -124,11 +124,16 @@ which is disallowed in Jenkinsfile, probably because it would allow to bypass th
   - you cannot used "qualified this", e.g. `ParentClass.this`.
 - Behavioral annotations such as `@Delegate`, `@Immutable`, etc. are unlikely to work.
 - Static type checking (@TypeChecked) is not recommended since it will cause cryptic errors.
-- Closure support is limited.
-In particular, `closure.rehydrate(...)` will not work. 
+- Closure support is limited. In particular:
+  - `closure.rehydrate(...)` will not work. 
 The resulting copy of the closure will execute, but any of its calls to
 will be silently ignored.
 You should just set the delegate of the original closure (`closure.delegate = ...`).
+  - Only the default "resolveStrategy" can be expected to work correctly,
+because other strategies rely on reflection (GroovyObject.invoke(String, Map)
+or GroovyObject.getProperty(String)), which are not safe to execute in the
+Jenkins sandbox.
+
 
 ### Troubleshooting
 

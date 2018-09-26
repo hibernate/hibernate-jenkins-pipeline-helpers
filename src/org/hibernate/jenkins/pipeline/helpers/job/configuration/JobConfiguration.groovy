@@ -29,9 +29,9 @@ class JobConfiguration {
 		file
 	}
 
-	public void setup(@DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = DSLElement) Closure closure) {
+	public void setup(@DelegatesTo(DSLElement) Closure closure) {
 		DSLElement dslElement = new DSLElement(this)
-		DslUtils.delegateTo(Closure.DELEGATE_FIRST, dslElement, closure)
+		DslUtils.delegateTo(dslElement, closure)
 
 		jdk.complete()
 		maven.complete()
@@ -54,12 +54,12 @@ class JobConfiguration {
 			configuration.file = file
 		}
 
-		void jdk(@DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = JdkConfiguration.DSLElement) Closure closure) {
-			DslUtils.delegateTo(Closure.DELEGATE_FIRST, configuration.jdk.dsl(), closure)
+		void jdk(@DelegatesTo(JdkConfiguration.DSLElement) Closure closure) {
+			DslUtils.delegateTo(configuration.jdk.dsl(), closure)
 		}
 
-		void maven(@DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = MavenConfiguration.DSLElement) Closure closure) {
-			DslUtils.delegateTo(Closure.DELEGATE_FIRST, configuration.maven.dsl(), closure)
+		void maven(@DelegatesTo(MavenConfiguration.DSLElement) Closure closure) {
+			DslUtils.delegateTo(configuration.maven.dsl(), closure)
 		}
 	}
 }
