@@ -43,7 +43,7 @@ Just run the script a few times, it will fail and logs will display a link to al
 #### Branch name
 
 ##### "primary" branches
-Branches named "master" or matching the regex /[0-9]+.[0-9]+/ will be considered as "primary" branches,
+Branches named "master" or matching the regex `/[0-9]+.[0-9]+/` will be considered as "primary" branches,
 and, depending on the Jenkinsfile, may undergo additional testing.
 
 ##### "tracking" branches
@@ -122,18 +122,18 @@ Constructors are not transformed, so they can't call such transformed methods.
 - `.with` cannot be used, because it requires to use reflection,
 which is disallowed in Jenkinsfile, probably because it would allow to bypass the sandbox. 
 - Nested classes support is quite bad. In particular:
-  - [you cannot reference an inner class (ParentClass.NestedClass) from another class](https://issues.jenkins-ci.org/browse/JENKINS-41896).
+  - [you cannot reference an inner class (`ParentClass.NestedClass`) from another class](https://issues.jenkins-ci.org/browse/JENKINS-41896).
   - you cannot used "qualified this", e.g. `ParentClass.this`.
 - Behavioral annotations such as `@Delegate`, `@Immutable`, etc. are unlikely to work.
-- Static type checking (@TypeChecked) is not recommended since it will cause cryptic errors.
+- Static type checking (`@TypeChecked`) is not recommended since it will cause cryptic errors.
 - Closure support is limited. In particular:
   - `closure.rehydrate(...)` will not work. 
 The resulting copy of the closure will execute, but any of its calls to
 will be silently ignored.
 You should just set the delegate of the original closure (`closure.delegate = ...`).
   - Only the default "resolveStrategy" can be expected to work correctly,
-because other strategies rely on reflection (GroovyObject.invoke(String, Map)
-or GroovyObject.getProperty(String)), which are not safe to execute in the
+because other strategies rely on reflection (`GroovyObject.invoke(String, Map)`
+or `GroovyObject.getProperty(String)`), which are not safe to execute in the
 Jenkins sandbox.
 - `java.util.Set` should be avoided, because at least some methods don't work correctly in Jenkins.
 In particular, `removeAll` has no effect whatsoever. `java.util.List` works fine.
@@ -154,6 +154,6 @@ hudson.remoting.ProxyException: com.cloudbees.groovy.cps.impl.CpsCallableInvocat
 ```
 
 Check that you're not executing a method inside a constructor (see "Known limitations").
-This includes calling methods from field initializers (@Field String myField = someObject.someMethod()).
+This includes calling methods from field initializers (`@Field String myField = someObject.someMethod()`).
 
 Move the method execution to the body of the script if necessary.
