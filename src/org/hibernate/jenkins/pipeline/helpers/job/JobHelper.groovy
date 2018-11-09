@@ -61,18 +61,6 @@ class JobHelper {
 		}
 	}
 
-	def loadYamlConfiguration(String yamlConfigFileId) {
-		try {
-			script.configFileProvider([script.configFile(fileId: yamlConfigFileId, variable: "FILE_PATH")]) {
-				return script.readYaml(file: script.FILE_PATH)
-			}
-		}
-		catch (Exception e) {
-			script.echo "Failed to load configuration file '$yamlConfigFileId'; assuming empty file. Exception was: $e"
-			return [:]
-		}
-	}
-
 	void configure(@DelegatesTo(JobConfiguration.DSLElement) Closure closure) {
 		script.echo "SCM source: $scmSource"
 		configuration.setup(closure)

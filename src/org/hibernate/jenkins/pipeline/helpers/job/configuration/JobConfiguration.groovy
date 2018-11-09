@@ -13,13 +13,17 @@ import org.hibernate.jenkins.pipeline.helpers.util.DslUtils
 
 @PackageScope([PackageScopeTarget.CONSTRUCTORS, PackageScopeTarget.FIELDS, PackageScopeTarget.METHODS])
 class JobConfiguration {
+	final def script
 	final JdkConfiguration jdk
 	final MavenConfiguration maven
 	final JobTrackingConfiguration tracking
 
+	private String configurationNodePattern
+	private String fileId
 	private def file
 
 	public JobConfiguration(def script, ScmSource scmSource) {
+		this.script = script
 		this.jdk = new JdkConfiguration()
 		this.maven = new MavenConfiguration(script)
 		this.tracking = new JobTrackingConfiguration(script, scmSource)
@@ -35,7 +39,27 @@ class JobConfiguration {
 
 		jdk.complete()
 		maven.complete()
+
+		JobConfiguration thiz = this
+		script.node(configurationNodePattern) {
+			// We can't refer to fields directly for some reason, probably because node() messes with the closure
+			thiz.file = loadYamlConfiguration(thiz.fileId)
+			thiz.script.echo "Job configuration: ${thiz.file}"
+		}
+
 		tracking.complete(file)
+	}
+
+	private def loadYamlConfiguration(String yamlConfigFileId) {
+		try {
+			script.configFileProvider([script.configFile(fileId: yamlConfigFileId, variable: "FILE_PATH")]) {
+				return script.readYaml(file: script.FILE_PATH)
+			}
+		}
+		catch (Exception e) {
+			script.echo "Failed to load configuration file '$yamlConfigFileId'; assuming empty file. Exception was: $e"
+			return [:]
+		}
 	}
 
 	/*
@@ -50,8 +74,12 @@ class JobConfiguration {
 			this.configuration = configuration
 		}
 
-		void file(def file) {
-			configuration.file = file
+		void file(String fileId) {
+			configuration.fileId = fileId
+		}
+
+		void configurationNodePattern(String nodePattern) {
+			configuration.configurationNodePattern = nodePattern
 		}
 
 		void jdk(@DelegatesTo(JdkConfiguration.DSLElement) Closure closure) {

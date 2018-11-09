@@ -24,12 +24,9 @@ def execute() {
 		])
 
 		stage('Configure') {
-			def loadedFile
-			node() {
-				loadedFile = helper.loadYamlConfiguration('job-configuration.yaml')
-			}
 			helper.configure({
-				file loadedFile
+				configurationNodePattern 'master||whatever'
+				file 'job-configuration.yaml'
 				maven {
 					defaultTool 'THE Maven default tool'
 					producedArtifactPattern "org/hibernate/search/*"
