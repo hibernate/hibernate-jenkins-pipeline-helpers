@@ -17,6 +17,7 @@ class JobConfiguration {
 	final JdkConfiguration jdk
 	final MavenConfiguration maven
 	final JobTrackingConfiguration tracking
+	final NotificationConfiguration notification
 
 	private String configurationNodePattern
 	private String fileId
@@ -26,6 +27,7 @@ class JobConfiguration {
 		this.script = script
 		this.jdk = new JdkConfiguration()
 		this.maven = new MavenConfiguration(script)
+		this.notification = new NotificationConfiguration(script)
 		this.tracking = new JobTrackingConfiguration(script, scmSource)
 	}
 
@@ -47,6 +49,7 @@ class JobConfiguration {
 			thiz.script.echo "Job configuration: ${thiz.file}"
 		}
 
+		notification.complete(file)
 		tracking.complete(file)
 	}
 
@@ -88,6 +91,10 @@ class JobConfiguration {
 
 		void maven(@DelegatesTo(MavenConfiguration.DSLElement) Closure closure) {
 			DslUtils.delegateTo(configuration.maven.dsl(), closure)
+		}
+
+		void notification(@DelegatesTo(NotificationConfiguration.DSLElement) Closure closure) {
+			DslUtils.delegateTo(configuration.notification.dsl(), closure)
 		}
 	}
 }

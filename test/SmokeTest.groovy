@@ -15,12 +15,17 @@ import static com.lesfurets.jenkins.unit.global.lib.LibraryConfiguration.library
 import static com.lesfurets.jenkins.unit.global.lib.LocalSource.localSource
 
 class SmokeTest extends BasePipelineTest {
-	private Map jobConfigurationFile = [:]
+	private Map jobConfigurationFile = [
+			'notification': [
+					'gitter': [
+							'urlCredentialsId': 'some-id'
+					]
+			]
+	]
 
 	@Override
 	@Before
 	void setUp() throws Exception {
-
 		String sharedLibs = this.class.getResource('./').getFile()
 
 		def library = library()

@@ -27,6 +27,7 @@ for an example of how the helpers are expected to be configured and used.
 
 If not already done, you will need to allow the following calls in <jenkinsUrl>/scriptApproval/:
 
+- method java.lang.Class isInstance java.lang.Object
 - method java.util.Map putIfAbsent java.lang.Object java.lang.Object
 - staticMethod org.jenkinsci.plugins.pipeline.modeldefinition.Utils markStageSkippedForConditional java.lang.String
 - new java.lang.IllegalArgumentException java.lang.String
@@ -71,7 +72,13 @@ notification:
   email:
     # String containing a space-separated list of email addresses to notify in case of failing non-PR builds.
     recipients: ...
- # Remotes to be added to git when checking out. Useful for tracking (see below) in particular.
+  gitter:
+    # List of "secret text" credentials for Gitter chat rooms that should be notified
+    # Note that only global credentials will work; the notification plugin apparently doesn't handle job-scoped credentials
+    urlCredentialsId:
+      - <credentialsId>
+      - <otherCredentialsId>
+# Remotes to be added to git when checking out. Useful for tracking (see below) in particular.
 scm:
   remotes:
     <remote-name>:

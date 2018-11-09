@@ -48,6 +48,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <version.org.codehaus.groovy>2.4.12</version.org.codehaus.groovy>
+        <version.org.jenkins-ci.plugins.credentials-binding>1.17</version.org.jenkins-ci.plugins.credentials-binding>
+
         <version.junit>4.12</version.junit>
         <version.com.lesfurets.jenkins-pipeline-unit>1.1</version.com.lesfurets.jenkins-pipeline-unit>
     </properties>
@@ -57,6 +59,11 @@
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
             <version>${version.org.codehaus.groovy}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>credentials-binding</artifactId>
+            <version>${version.org.jenkins-ci.plugins.credentials-binding}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -190,4 +197,31 @@
             </plugin>
         </plugins>
     </build>
+
+    <repositories>
+        <repository>
+            <id>jenkins-ci-releases</id>
+            <name>jenkins-ci-releases</name>
+            <url>https://repo.jenkins-ci.org/releases</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+                <updatePolicy>never</updatePolicy>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>jenkins-ci-snapshots</id>
+            <name>jenkins-ci-snapshots</name>
+            <url>https://repo.jenkins-ci.org/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
 </project>

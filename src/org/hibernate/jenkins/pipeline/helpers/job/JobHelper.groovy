@@ -67,6 +67,12 @@ class JobHelper {
 		configured = true
 	}
 
+	def generateNotificationProperty() {
+		return [$class: 'HudsonNotificationProperty',
+				endpoints: configuration.notification.endpoints
+		]
+	}
+
 	void markStageSkipped() {
 		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional(script.STAGE_NAME)
 	}

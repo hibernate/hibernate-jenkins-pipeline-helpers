@@ -49,7 +49,8 @@ def execute() {
 									upstream(helper.configuration.tracking.trackedAsString)
 							]
 									: []
-					)
+					),
+					helper.generateNotificationProperty()
 			])
 
 			environments.content.each { key, envSet ->
