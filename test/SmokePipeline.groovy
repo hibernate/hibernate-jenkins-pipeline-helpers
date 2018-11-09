@@ -44,11 +44,7 @@ def execute() {
 									// Normally we don't have snapshot dependencies, so this doesn't matter, but some branches do
 									snapshotDependencies()
 							]
-									+ helper.configuration.tracking.trackedAsString ? [
-									// Rebuild when tracked jobs are rebuilt
-									upstream(helper.configuration.tracking.trackedAsString)
-							]
-									: []
+									+ helper.generateUpstreamTriggers()
 					),
 					helper.generateNotificationProperty()
 			])

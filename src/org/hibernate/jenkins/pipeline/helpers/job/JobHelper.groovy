@@ -67,6 +67,17 @@ class JobHelper {
 		configured = true
 	}
 
+	List generateUpstreamTriggers() {
+		String trackedAsString = configuration.tracking.trackedAsString
+		if ( trackedAsString ) {
+			// Rebuild when tracked jobs are rebuilt
+			return [script.upstream( trackedAsString )]
+		}
+		else {
+			return []
+		}
+	}
+
 	def generateNotificationProperty() {
 		return [$class: 'HudsonNotificationProperty',
 				endpoints: configuration.notification.endpoints

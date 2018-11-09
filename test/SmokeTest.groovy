@@ -71,7 +71,7 @@ class SmokeTest extends BasePipelineTest {
 		helper.registerAllowedMethod("pipelineTriggers", [List.class], null)
 		helper.registerAllowedMethod("issueCommentTrigger", [String.class], {String args -> [type: 'issueCommentTrigger', args: args]})
 		helper.registerAllowedMethod("snapshotDependencies", [], {String args -> [type: 'snapshotDependencies']})
-		helper.registerAllowedMethod("upstream", [String.class], {String args -> [type: 'issueCommentTrigger', args: args]})
+		helper.registerAllowedMethod("upstream", [String.class], {String args -> [type: 'upstream', args: args]})
 
 		helper.registerAllowedMethod("emailext", [Map.class], null)
 		helper.registerAllowedMethod("requestor", [], {String args -> [type: 'requestor', args: args]})
