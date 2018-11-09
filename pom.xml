@@ -3,7 +3,7 @@
 
     <groupId>org.hibernate.jenkins.pipeline</groupId>
     <artifactId>hibernate-jenkins-pipeline-helpers</artifactId>
-    <version>1.1</version>
+    <version>1.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Hibernate Helpers for Jenkins Pipelines</name>
@@ -17,7 +17,7 @@
         <connection>scm:git:git://github.com/hibernate/hibernate-jenkins-pipeline-helpers.git</connection>
         <developerConnection>scm:git:git@github.com:hibernate/hibernate-jenkins-pipeline-helpers.git</developerConnection>
         <url>http://github.com/hibernate/hibernate-jenkins-pipeline-helpers</url>
-        <tag>1.1</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <organization>
