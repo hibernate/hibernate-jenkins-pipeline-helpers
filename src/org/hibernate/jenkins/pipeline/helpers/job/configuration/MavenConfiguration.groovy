@@ -19,18 +19,18 @@ class MavenConfiguration {
 
 	MavenConfiguration(def script) {
 		this.script = script
-		localRepositoryRelativePath = ".repository"
+		localRepositoryRelativePath = "maven-repository"
 	}
 
 	public String getLocalRepositoryPath() {
-		String workspacePath = script.env.WORKSPACE
-		if (!workspacePath) {
+		String workspaceTempPath = script.pwd(tmp: true)
+		if (!workspaceTempPath) {
 			throw new IllegalStateException(
-					"Cannot determine the Maven local repository path if the Jenkins workspace path is unknown." +
+					"Cannot determine the Maven local repository path if the Jenkins temporary workspace path is unknown." +
 					" Try again within a node() step."
 			)
 		}
-		return "$workspacePath/$localRepositoryRelativePath"
+		return "$workspaceTempPath/$localRepositoryRelativePath"
 	}
 
 	public String getDefaultTool() {

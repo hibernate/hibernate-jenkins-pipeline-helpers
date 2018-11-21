@@ -77,6 +77,7 @@ class SmokeTest extends BasePipelineTest {
 		helper.registerAllowedMethod("requestor", [], {String args -> [type: 'requestor', args: args]})
 		helper.registerAllowedMethod("culprits", [], {String args -> [type: 'culprits', args: args]})
 		helper.registerAllowedMethod("developers", [], {String args -> [type: 'developers', args: args]})
+		helper.registerAllowedMethod("pwd", [Map.class], {Map args -> args.tmp ? '/path/to/workspace@tmp/' : '/path/to/workapace/'})
 
 		binding.setVariable('scm', new GitScmStub())
 		helper.registerAllowedMethod("checkout", [GitScmStub.class], {GitScmStub args -> args})

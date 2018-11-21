@@ -123,21 +123,21 @@ class JobHelper {
 			 * and thus might result from a different revision of the source code.
 			 * We copy the built artifacts from one stage to another explicitly when necessary; see resumeFromDefaultBuild().
 			 */
-			script.cleanWs(
-					deleteDirs: true,
-					patterns: maven.producedArtifactPatterns.collect(
-							{ pattern -> [type: 'INCLUDE', pattern: "$maven.localRepositoryPath/$pattern"] }
-					)
-			)
+			script.dir(maven.localRepositoryPath) {
+				script.cleanWs(
+						deleteDirs: true,
+						patterns: maven.producedArtifactPatterns.collect(
+								{ pattern -> [type: 'INCLUDE', pattern: pattern] }
+						)
+				)
+			}
 		}
 
 		/*
 		 * Remove everything unless we know it's safe, to prevent previous builds from interfering with the current build.
-		 * Keep the local Maven repository and Git metadata, since they may be reused safely.
+		 * Keep the Git metadata, since it may be reused safely.
 		 */
 		script.cleanWs(deleteDirs: true, patterns: [
-				// The Maven repository is safe, we cleaned it up just above
-				[type: 'EXCLUDE', pattern: "$maven.localRepositoryPath/**"],
 				// The Git metadata is safe, we check out the correct branch just below
 				[type: 'EXCLUDE', pattern: ".git/**"]
 		])
