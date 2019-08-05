@@ -22,6 +22,7 @@ for an example of how the helpers are expected to be configured and used.
  - https://plugins.jenkins.io/email-ext
  - https://plugins.jenkins.io/config-file-provider
  - https://plugins.jenkins.io/pipeline-utility-steps for YAML reading
+ - https://plugins.jenkins.io/notification for Gitter notifications
 
 #### Script approval
 
