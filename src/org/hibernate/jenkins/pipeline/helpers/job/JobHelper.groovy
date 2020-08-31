@@ -145,6 +145,15 @@ class JobHelper {
 		// Check out the code
 		script.checkout script.scm
 
+		def userName = 'Hibernate-CI'
+		def userEmail = 'ci@hibernate.org'
+		if (configuration.file?.scm?.user) {
+			userName = configuration.file.scm.user.name
+			userEmail = configuration.file.scm.user.email
+		}
+		script.sh "git config 'user.name' '${userName}'"
+		script.sh "git config 'user.email' '${userEmail}'"
+
 		// Take tracking configuration into account
 		String base = configuration.tracking.fileSection?.base
 		if (base) {

@@ -79,8 +79,12 @@ notification:
     urlCredentialsId:
       - <credentialsId>
       - <otherCredentialsId>
-# Remotes to be added to git when checking out. Useful for tracking (see below) in particular.
 scm:
+  # User info for commits created during the job. Useful for releases in particular.
+  user:
+    name: ... # Defaults to 'Hibernate-CI'
+    email: ... # Defaults to 'ci@hibernate.org' 
+  # Remotes to be added to git when checking out. Useful for tracking (see below) in particular.
   remotes:
     <remote-name>:
       # The URL of a remote
