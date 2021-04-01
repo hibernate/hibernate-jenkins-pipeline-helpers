@@ -33,7 +33,7 @@ class SmokeTest extends BasePipelineTest {
 				.allowOverride(true)
 				.retriever(localSource(sharedLibs))
 				.targetPath(sharedLibs)
-				.defaultVersion("master")
+				.defaultVersion("main")
 				.implicit(false)
 				.build()
 		helper.registerSharedLibrary(library)

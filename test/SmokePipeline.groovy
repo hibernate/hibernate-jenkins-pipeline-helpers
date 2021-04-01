@@ -25,7 +25,7 @@ def execute() {
 
 		stage('Configure') {
 			helper.configure({
-				configurationNodePattern 'master||whatever'
+				configurationNodePattern 'coordinator||whatever'
 				file 'job-configuration.yaml'
 				maven {
 					defaultTool 'THE Maven default tool'

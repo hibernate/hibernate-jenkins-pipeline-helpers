@@ -94,7 +94,7 @@ tracking:
   # if the branch is named "tracking-foo", the tracking ID will be "foo".
   <tracking-name>:
     # The Git refspec to the base of this tracking branch.
-    # For example this can be "origin/master" or "upstream/master" (if a remote named "upstream" is defined).
+    # For example this can be "origin/main" or "upstream/main" (if a remote named "upstream" is defined).
     base: ...
     # The Jenkins jobs to track.
     # Use "branchname" to reference jobs corresponding to other branches in the same multibranch job.

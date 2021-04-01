@@ -106,7 +106,7 @@
                             <goal>testResources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.testOutputDirectory}/hibernate-jenkins-pipeline-helpers@master</outputDirectory>
+                            <outputDirectory>${project.build.testOutputDirectory}/hibernate-jenkins-pipeline-helpers@main</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>${project.basedir}</directory>
