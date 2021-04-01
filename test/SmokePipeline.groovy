@@ -6,7 +6,7 @@
  */
 
 import com.lesfurets.jenkins.unit.global.lib.Library
-@Library('hibernate-jenkins-pipeline-helpers@master')
+@Library('hibernate-jenkins-pipeline-helpers@main')
 import org.hibernate.jenkins.pipeline.helpers.job.JobHelper
 import org.hibernate.jenkins.pipeline.helpers.alternative.AlternativeMultiMap
 import org.hibernate.jenkins.pipeline.helpers.version.Version
