@@ -45,7 +45,7 @@ Just run the script a few times, it will fail and logs will display a link to al
 #### Branch name
 
 ##### "primary" branches
-Branches named "master" or matching the regex `/[0-9]+.[0-9]+/` will be considered as "primary" branches,
+Branches named "main", "master" or matching the regex `/[0-9]+.[0-9]+/` will be considered as "primary" branches,
 and, depending on the Jenkinsfile, may undergo additional testing.
 
 ##### "tracking" branches

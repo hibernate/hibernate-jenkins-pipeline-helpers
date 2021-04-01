@@ -9,7 +9,7 @@ package org.hibernate.jenkins.pipeline.helpers.scm
 import java.util.regex.Pattern
 
 class ScmBranch {
-	private static final Pattern PRIMARY_PATTERN = ~/^master|\d+\.\d+$/
+	private static final Pattern PRIMARY_PATTERN = ~/^main|master|\d+\.\d+$/
 	private static final Pattern TRACKING_PATTERN = ~/^tracking-(.+)$/
 
 	String name
@@ -20,7 +20,7 @@ class ScmBranch {
 	}
 
 	/**
-	 * @return Whether this branch is "primary", i.e. it's either "master" or a maintenance branch.
+	 * @return Whether this branch is "primary", i.e. it's either "main", "master" or a maintenance branch.
 	 * The purpose of primary branches is to hold the history of a major version of the code,
 	 * whereas the only purpose  of "feature" branches is to eventually be merged into a primary branch.
 	 */
