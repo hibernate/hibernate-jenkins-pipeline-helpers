@@ -10,5 +10,9 @@
             <directory>src</directory>
             <outputDirectory>lib/src</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>vars</directory>
+            <outputDirectory>lib/vars</outputDirectory>
+        </fileSet>
     </fileSets>
 </assembly>

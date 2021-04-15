@@ -7,6 +7,7 @@
 package org.hibernate.jenkins.pipeline.helpers.job
 
 import org.hibernate.jenkins.pipeline.helpers.job.configuration.JobConfiguration
+import org.hibernate.jenkins.pipeline.helpers.notification.Notifier
 import org.hibernate.jenkins.pipeline.helpers.scm.ScmSource
 
 class JobHelper {
@@ -173,40 +174,8 @@ class JobHelper {
 	}
 
 	private void notifyBuildEnd() {
-		def currentBuild = script.currentBuild
-		boolean success = currentBuild.result == 'SUCCESS'
-		boolean successAfterSuccess = success &&
-				currentBuild.previousBuild != null && currentBuild.previousBuild.result == 'SUCCESS'
-
-		String explicitRecipients = null
-
-		// Always notify people who explicitly requested a build
-		def recipientProviders = [script.requestor()]
-
-		// In case of failure, notify all the people who committed a change since the last non-broken build
-		if (!success) {
-			script.echo "Notification recipients: adding culprits()"
-			recipientProviders.add(script.culprits())
-		}
-		// Always notify the author of the changeset, except in the case of a "success after a success"
-		if (!successAfterSuccess) {
-			script.echo "Notification recipients: adding developers()"
-			recipientProviders.add(script.developers())
-		}
-
-		// Notify the notification recipients configured on the job,
-		// except in the case of a non-tracking PR build or of a "success after a success"
-		if ((!scmSource.pullRequest || scmSource.branch.tracking) && !successAfterSuccess) {
-			explicitRecipients = configuration.file?.notification?.email?.recipients
-		}
-
-		// See https://plugins.jenkins.io/email-ext#Email-extplugin-PipelineExamples
-		script.emailext(
-				subject: '${DEFAULT_SUBJECT}',
-				body: '${DEFAULT_CONTENT}',
-				recipientProviders: recipientProviders,
-				to: explicitRecipients
-		)
+		new Notifier(script).notifyBuildResult(maintainers: (String) configuration.file?.notification?.email?.recipients,
+				notifySuccessAfterSuccess: (scmSource.branch.tracking != null))
 	}
 
 }

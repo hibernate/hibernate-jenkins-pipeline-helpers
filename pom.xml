@@ -114,6 +114,7 @@
                                     <filtering>false</filtering>
                                     <includes>
                                         <include>src/**/*.*</include>
+                                        <include>vars/**/*.*</include>
                                     </includes>
                                 </resource>
                             </resources>

@@ -14,7 +14,9 @@ import org.junit.Test
 import static com.lesfurets.jenkins.unit.global.lib.LibraryConfiguration.library
 import static com.lesfurets.jenkins.unit.global.lib.LocalSource.localSource
 
-class SmokeTest extends BasePipelineTest {
+class SmokeProgrammaticPipelineTest extends BasePipelineTest {
+	private static final SCRIPT_NAME = "SmokeProgrammaticPipeline.groovy"
+	
 	private Map jobConfigurationFile = [
 			'notification': [
 					'gitter': [
@@ -38,7 +40,7 @@ class SmokeTest extends BasePipelineTest {
 				.build()
 		helper.registerSharedLibrary(library)
 
-		setScriptRoots([ 'src', 'test' ] as String[])
+		setScriptRoots([ 'src', 'test', 'vars' ] as String[])
 		setScriptExtension('groovy')
 
 		helper.registerAllowedMethod("configFile", [Map.class], {Map args -> [type: 'configFile', args: args]})
@@ -77,7 +79,7 @@ class SmokeTest extends BasePipelineTest {
 		helper.registerAllowedMethod("requestor", [], {String args -> [type: 'requestor', args: args]})
 		helper.registerAllowedMethod("culprits", [], {String args -> [type: 'culprits', args: args]})
 		helper.registerAllowedMethod("developers", [], {String args -> [type: 'developers', args: args]})
-		helper.registerAllowedMethod("pwd", [Map.class], {Map args -> args.tmp ? '/path/to/workspace@tmp/' : '/path/to/workapace/'})
+		helper.registerAllowedMethod("pwd", [Map.class], {Map args -> args.tmp ? '/path/to/workspace@tmp/' : '/path/to/workspace/'})
 
 		binding.setVariable('scm', new GitScmStub())
 		helper.registerAllowedMethod("checkout", [GitScmStub.class], {GitScmStub args -> args})
@@ -88,7 +90,7 @@ class SmokeTest extends BasePipelineTest {
 	@Test
 	void branch() throws Exception {
 		binding.setVariable('env', new EnvStub())
-		Script script = loadScript("SmokePipeline.groovy")
+		Script script = loadScript(SCRIPT_NAME)
 		script.execute()
 		printCallStack()
 		assertJobStatusSuccess()
@@ -97,7 +99,7 @@ class SmokeTest extends BasePipelineTest {
 	@Test
 	void pullRequest() throws Exception {
 		binding.setVariable('env', new EnvStub(CHANGE_ID: "PR 2", CHANGE_TARGET: "targetBranch", CHANGE_BRANCH: "sourceBranch"))
-		Script script = loadScript("SmokePipeline.groovy")
+		Script script = loadScript(SCRIPT_NAME)
 		script.execute()
 		printCallStack()
 		assertJobStatusSuccess()
@@ -114,7 +116,7 @@ class SmokeTest extends BasePipelineTest {
 		        ]
 		]
 
-		Script script = loadScript("SmokePipeline.groovy")
+		Script script = loadScript(SCRIPT_NAME)
 		script.execute()
 		printCallStack()
 		assertJobStatusSuccess()

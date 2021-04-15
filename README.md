@@ -5,9 +5,36 @@ This is a shared library containing helpers for Jenkins pipeline.
 See below for documentation of the helpers.
 
 See near the bottom of this file for help writing Groovy in a Jenkinsfile environment,
-be it a Jenkinsfile or a shared library like this one. 
+be it a Jenkinsfile or a shared library like this one.
 
-## Using the helpers
+## Using the helper steps (declarative pipelines)
+
+This library provides a set of helper steps that can come in handy
+in progammatic pipelines.
+
+### notifyBuildResult
+
+Usage:
+
+```groovy
+notifyBuildResult({
+  /**
+   * Space-separated emails of maintainers to notify of build results on primary branches.
+   * Optional, defaults to empty.
+   */
+  maintainers "foo@example.com bar@example.com"
+  /**
+   * Whether maintainers should always be notified.
+   * Optional, defaults to false.
+   */
+  notifySuccessAfterSuccess true
+})
+```
+
+## Using the helper classes (programmatic pipelines)
+
+This library provides a set of helper classes that can come in handy
+in progammatic pipelines.
 
 See the content of the `execute()` method in `test/SmokePipeline.groovy`
 for an example of how the helpers are expected to be configured and used.
