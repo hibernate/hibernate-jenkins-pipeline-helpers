@@ -17,18 +17,18 @@ in progammatic pipelines.
 Usage:
 
 ```groovy
-notifyBuildResult({
+notifyBuildResult(
   /**
    * Space-separated emails of maintainers to notify of build results on primary branches.
    * Optional, defaults to empty.
    */
-  maintainers "foo@example.com bar@example.com"
+  maintainers: "foo@example.com bar@example.com"
   /**
    * Whether maintainers should always be notified.
    * Optional, defaults to false.
    */
-  notifySuccessAfterSuccess true
-})
+  notifySuccessAfterSuccess: true
+)
 ```
 
 ## Using the helper classes (programmatic pipelines)
