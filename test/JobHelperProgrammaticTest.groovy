@@ -14,8 +14,8 @@ import org.junit.Test
 import static com.lesfurets.jenkins.unit.global.lib.LibraryConfiguration.library
 import static com.lesfurets.jenkins.unit.global.lib.LocalSource.localSource
 
-class SmokeProgrammaticPipelineTest extends BasePipelineTest {
-	private static final SCRIPT_NAME = "SmokeProgrammaticPipeline.groovy"
+class JobHelperProgrammaticTest extends BasePipelineTest {
+	private static final SCRIPT_NAME = "JobHelperProgrammaticPipeline.groovy"
 	
 	private Map jobConfigurationFile = [
 			'notification': [

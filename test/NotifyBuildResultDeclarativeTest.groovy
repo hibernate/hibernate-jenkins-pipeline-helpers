@@ -15,8 +15,8 @@ import org.junit.Test
 import static com.lesfurets.jenkins.unit.global.lib.LibraryConfiguration.library
 import static com.lesfurets.jenkins.unit.global.lib.LocalSource.localSource
 
-class SmokeDeclarativePipelineTest extends DeclarativePipelineTest {
-	private static final SCRIPT_NAME = "SmokeDeclarativePipeline.groovy"
+class NotifyBuildResultDeclarativeTest extends DeclarativePipelineTest {
+	private static final SCRIPT_NAME = "NotifyBuildResultDeclarativePipeline.groovy"
 
 	private Map jobConfigurationFile = [
 			'notification': [
@@ -65,6 +65,8 @@ class SmokeDeclarativePipelineTest extends DeclarativePipelineTest {
 		helper.registerAllowedMethod("requestor", [], {String args -> [type: 'requestor', args: args]})
 		helper.registerAllowedMethod("developers", [], {String args -> [type: 'developers', args: args]})
 		helper.registerAllowedMethod("culprits", [], {String args -> [type: 'developers', args: args]})
+
+		binding.setVariable('scm', new GitScmStub())
 
 		super.setUp()
 	}
