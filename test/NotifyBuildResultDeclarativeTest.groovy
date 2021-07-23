@@ -76,7 +76,6 @@ class NotifyBuildResultDeclarativeTest extends DeclarativePipelineTest {
 		binding.setVariable('env', new EnvStub())
 		doStuffShouldSucceed = true
 		def script = runScript(SCRIPT_NAME)
-		printCallStack()
 		assertJobStatusSuccess()
 	}
 
@@ -86,7 +85,6 @@ class NotifyBuildResultDeclarativeTest extends DeclarativePipelineTest {
 		binding.setVariable('env', new EnvStub())
 		doStuffShouldSucceed = false
 		def script = runScript(SCRIPT_NAME)
-		printCallStack()
 		assertJobStatusFailure()
 	}
 
@@ -95,7 +93,6 @@ class NotifyBuildResultDeclarativeTest extends DeclarativePipelineTest {
 		binding.setVariable('env', new EnvStub(CHANGE_ID: "PR 2", CHANGE_TARGET: "targetBranch", CHANGE_BRANCH: "sourceBranch"))
 		doStuffShouldSucceed = true
 		def script = runScript(SCRIPT_NAME)
-		printCallStack()
 		assertJobStatusSuccess()
 	}
 
@@ -105,7 +102,6 @@ class NotifyBuildResultDeclarativeTest extends DeclarativePipelineTest {
 		binding.setVariable('env', new EnvStub(CHANGE_ID: "PR 2", CHANGE_TARGET: "targetBranch", CHANGE_BRANCH: "sourceBranch"))
 		doStuffShouldSucceed = false
 		def script = runScript(SCRIPT_NAME)
-		printCallStack()
 		assertJobStatusFailure()
 	}
 
@@ -122,7 +118,6 @@ class NotifyBuildResultDeclarativeTest extends DeclarativePipelineTest {
 
 		doStuffShouldSucceed = true
 		def script = runScript(SCRIPT_NAME)
-		printCallStack()
 		assertJobStatusSuccess()
 	}
 
@@ -140,7 +135,6 @@ class NotifyBuildResultDeclarativeTest extends DeclarativePipelineTest {
 
 		doStuffShouldSucceed = false
 		def script = runScript(SCRIPT_NAME)
-		printCallStack()
 		assertJobStatusSuccess()
 	}
 }
