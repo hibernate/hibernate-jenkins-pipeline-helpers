@@ -28,8 +28,12 @@ class JobHelperProgrammaticTest extends BasePipelineTest {
 	@Override
 	@Before
 	void setUp() throws Exception {
-		String sharedLibs = this.class.getResource('./').getFile()
+		setScriptRoots([ 'src', 'test', 'vars' ] as String[])
+		setScriptExtension('groovy')
 
+		super.setUp()
+
+		String sharedLibs = this.class.getResource('./').getFile()
 		def library = library()
 				.name('hibernate-jenkins-pipeline-helpers')
 				.allowOverride(true)
@@ -39,9 +43,6 @@ class JobHelperProgrammaticTest extends BasePipelineTest {
 				.implicit(false)
 				.build()
 		helper.registerSharedLibrary(library)
-
-		setScriptRoots([ 'src', 'test', 'vars' ] as String[])
-		setScriptExtension('groovy')
 
 		helper.registerAllowedMethod("configFile", [Map.class], {Map args -> [type: 'configFile', args: args]})
 		helper.registerAllowedMethod("configFileProvider", [List.class, Closure.class], {List args, Closure c ->
@@ -83,8 +84,6 @@ class JobHelperProgrammaticTest extends BasePipelineTest {
 
 		binding.setVariable('scm', new GitScmStub())
 		helper.registerAllowedMethod("checkout", [GitScmStub.class], {GitScmStub args -> args})
-
-		super.setUp()
 	}
 
 	@Test

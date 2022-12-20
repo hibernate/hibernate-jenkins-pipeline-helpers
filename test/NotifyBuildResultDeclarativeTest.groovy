@@ -31,8 +31,12 @@ class NotifyBuildResultDeclarativeTest extends DeclarativePipelineTest {
 	@Override
 	@Before
 	void setUp() throws Exception {
-		String sharedLibs = this.class.getResource('./').getFile()
+		setScriptRoots([ 'src', 'test', 'vars' ] as String[])
+		setScriptExtension('groovy')
 
+		super.setUp()
+
+		String sharedLibs = this.class.getResource('./').getFile()
 		def library = library()
 				.name('hibernate-jenkins-pipeline-helpers')
 				.allowOverride(true)
@@ -43,17 +47,8 @@ class NotifyBuildResultDeclarativeTest extends DeclarativePipelineTest {
 				.build()
 		helper.registerSharedLibrary(library)
 
-		setScriptRoots([ 'src', 'test', 'vars' ] as String[])
-		setScriptExtension('groovy')
-
-		helper.registerAllowedMethod("post", [Closure.class], {Closure c ->
-			c.delegate = delegate
-			helper.callClosure(c)
-		})
-		helper.registerAllowedMethod("always", [Closure.class], {Closure c ->
-			c.delegate = delegate
-			helper.callClosure(c)
-		})
+		helper.registerAllowedMethod("post", [Closure])
+		helper.registerAllowedMethod("always", [Closure])
 
 		helper.registerAllowedMethod("doStuff", [], {String args ->
 			if (!doStuffShouldSucceed) {
@@ -67,8 +62,6 @@ class NotifyBuildResultDeclarativeTest extends DeclarativePipelineTest {
 		helper.registerAllowedMethod("culprits", [], {String args -> [type: 'developers', args: args]})
 
 		binding.setVariable('scm', new GitScmStub())
-
-		super.setUp()
 	}
 
 	@Test
