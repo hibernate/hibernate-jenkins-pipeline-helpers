@@ -174,7 +174,7 @@ class JobHelper {
 	}
 
 	private void notifyBuildEnd() {
-		new Notifier(script).notifyBuildResult(maintainers: (String) configuration.file?.notification?.email?.recipients,
+		new Notifier(script).doNotifyBuildResult(maintainers: (String) configuration.file?.notification?.email?.recipients,
 				notifySuccessAfterSuccess: (scmSource.branch.tracking != null))
 	}
 

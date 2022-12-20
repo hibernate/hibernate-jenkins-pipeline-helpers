@@ -16,7 +16,7 @@ class Notifier {
 		this.script = script
 	}
 
-	void notifyBuildResult(Map args) {
+	void doNotifyBuildResult(Map args) {
 		Configuration configuration = new Configuration(args)
 		boolean success = script.currentBuild.result == 'SUCCESS'
 		boolean successAfterSuccess = success &&
