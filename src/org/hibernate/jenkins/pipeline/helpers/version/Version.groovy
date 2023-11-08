@@ -10,27 +10,34 @@ import java.util.regex.Pattern
 
 class Version {
 
-	private static final Pattern RELEASE_VERSION_PATTERN = ~/^(\d+)\.(\d+)\.(\d+)\.((?<=\.0\.)(?:Alpha\d+|Beta\d+|CR\d+)|Final)$/
+	enum Scheme {
+		JBOSS_CLASSIC(~/^(\d+)\.(\d+)\.(\d+)\.((?<=\.0\.)(?:Alpha\d+|Beta\d+|CR\d+)|Final)$/, ~/^(\d+)\.(\d+)\.(\d+)-SNAPSHOT$/),
+		JBOSS_NO_FINAL(~/^(\d+)\.(\d+)\.(\d+)(?:\.((?<=\.0\.)(?:Alpha\d+|Beta\d+|CR\d+)))?$/, ~/^(\d+)\.(\d+)\.(\d+)-SNAPSHOT$/);
+		final Pattern releaseVersionPattern
+		final Pattern developmentVersionPattern
+		private Scheme(Pattern releaseVersionPattern, Pattern developmentVersionPattern) {
+			this.releaseVersionPattern = releaseVersionPattern
+			this.developmentVersionPattern = developmentVersionPattern
+		}
+	}
 
-	private static final Pattern DEVELOPMENT_VERSION_PATTERN = ~/^(\d+)\.(\d+)\.(\d+)-SNAPSHOT$/
-
-	static Version parseReleaseVersion(String versionString) {
-		def matcher = (versionString =~ RELEASE_VERSION_PATTERN)
+	static Version parseReleaseVersion(String versionString, Scheme scheme = Scheme.JBOSS_CLASSIC) {
+		def matcher = (versionString =~ scheme.releaseVersionPattern)
 		if (!matcher.matches()) {
 			throw new IllegalArgumentException(
 					"Invalid version number: '$versionString'." +
-							" Release version numbers must match /$RELEASE_VERSION_PATTERN/."
+							" Release version numbers must match /$scheme.releaseVersionPattern/."
 			)
 		}
 		return new Version(matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4), false)
 	}
 
-	static Version parseDevelopmentVersion(String versionString) {
-		def matcher = (versionString =~ DEVELOPMENT_VERSION_PATTERN)
+	static Version parseDevelopmentVersion(String versionString, Scheme scheme = Scheme.JBOSS_CLASSIC) {
+		def matcher = (versionString =~ scheme.developmentVersionPattern)
 		if (!matcher.matches()) {
 			throw new IllegalArgumentException(
 					"Invalid version number: '$versionString'." +
-							" Development version numbers must match /$DEVELOPMENT_VERSION_PATTERN/."
+							" Development version numbers must match /$scheme.developmentVersionPattern/."
 			)
 		}
 
