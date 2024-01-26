@@ -52,18 +52,18 @@
         <dependency>
             <groupId>org.jenkins-ci.main</groupId>
             <artifactId>jenkins-core</artifactId>
-            <version>2.414.2</version>
+            <version>2.442</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
-            <version>2.4.12</version>
+            <version>2.4.21</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>credentials-binding</artifactId>
-            <version>1.23</version>
+            <version>657.v2b_19db_7d6e6d</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -75,7 +75,7 @@
         <dependency>
             <groupId>com.lesfurets</groupId>
             <artifactId>jenkins-pipeline-unit</artifactId>
-            <version>1.16</version>
+            <version>1.19</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
