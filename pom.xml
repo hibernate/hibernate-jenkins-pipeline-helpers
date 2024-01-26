@@ -46,12 +46,6 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <version.org.codehaus.groovy>2.4.12</version.org.codehaus.groovy>
-        <version.org.jenkins-ci.plugins.credentials-binding>1.23</version.org.jenkins-ci.plugins.credentials-binding>
-
-        <version.junit>4.13.2</version.junit>
-        <version.com.lesfurets.jenkins-pipeline-unit>1.16</version.com.lesfurets.jenkins-pipeline-unit>
     </properties>
 
     <dependencies>
@@ -64,24 +58,24 @@
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
-            <version>${version.org.codehaus.groovy}</version>
+            <version>2.4.12</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>credentials-binding</artifactId>
-            <version>${version.org.jenkins-ci.plugins.credentials-binding}</version>
+            <version>1.23</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>${version.junit}</version>
+            <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
         <!-- See https://github.com/jenkinsci/JenkinsPipelineUnit -->
         <dependency>
             <groupId>com.lesfurets</groupId>
             <artifactId>jenkins-pipeline-unit</artifactId>
-            <version>${version.com.lesfurets.jenkins-pipeline-unit}</version>
+            <version>1.16</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
