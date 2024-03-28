@@ -12,6 +12,22 @@ be it a Jenkinsfile or a shared library like this one.
 This library provides a set of helper steps that can come in handy
 in both declarative and programmatic pipelines.
 
+### requireApprovalForPullRequest
+
+Blocks pull request builds (and only pull request builds)
+pending approval from a given user group.
+
+The approval is skipped if:
+
+* the pull request was submitted by a member of the given user group.
+* the build was triggered explicitly by a member of the given user group. 
+
+Usage:
+
+```groovy
+requireApprovalForPullRequest 'hibernate'
+```
+
 ### notifyBuildResult
 
 Usage:
