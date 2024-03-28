@@ -6,7 +6,6 @@
  */
 
 import com.lesfurets.jenkins.unit.BasePipelineTest
-import jenkinsapis.EnvStub
 import jenkinsapis.GitScmStub
 import org.junit.Before
 import org.junit.Test
@@ -25,10 +24,11 @@ class JobHelperProgrammaticTest extends BasePipelineTest {
 			]
 	]
 
+
 	@Override
 	@Before
 	void setUp() throws Exception {
-		setScriptRoots([ 'src', 'test', 'vars' ] as String[])
+		setScriptRoots(['src', 'test', 'vars'] as String[])
 		setScriptExtension('groovy')
 
 		super.setUp()
@@ -43,6 +43,11 @@ class JobHelperProgrammaticTest extends BasePipelineTest {
 				.implicit(false)
 				.build()
 		helper.registerSharedLibrary(library)
+	}
+
+	@Override
+	void registerAllowedMethods() {
+		super.registerAllowedMethods()
 
 		helper.registerAllowedMethod("configFile", [Map.class], {Map args -> [type: 'configFile', args: args]})
 		helper.registerAllowedMethod("configFileProvider", [List.class, Closure.class], {List args, Closure c ->
@@ -82,13 +87,20 @@ class JobHelperProgrammaticTest extends BasePipelineTest {
 		helper.registerAllowedMethod("developers", [], {String args -> [type: 'developers', args: args]})
 		helper.registerAllowedMethod("pwd", [Map.class], {Map args -> args.tmp ? '/path/to/workspace@tmp/' : '/path/to/workspace/'})
 
-		binding.setVariable('scm', new GitScmStub())
 		helper.registerAllowedMethod("checkout", [GitScmStub.class], {GitScmStub args -> args})
+	}
+
+	@Override
+	void setVariables() {
+		super.setVariables()
+
+		binding.setVariable('scm', new GitScmStub())
+		addEnvVar('BRANCH_NAME', 'branch_name')
+		addEnvVar('WORKSPACE', '/path/to/workspace')
 	}
 
 	@Test
 	void branch() throws Exception {
-		binding.setVariable('env', new EnvStub())
 		Script script = loadScript(SCRIPT_NAME)
 		script.execute()
 		printCallStack()
@@ -97,7 +109,10 @@ class JobHelperProgrammaticTest extends BasePipelineTest {
 
 	@Test
 	void pullRequest() throws Exception {
-		binding.setVariable('env', new EnvStub(CHANGE_ID: "PR 2", CHANGE_TARGET: "targetBranch", CHANGE_BRANCH: "sourceBranch"))
+		addEnvVar('CHANGE_ID', 'PR 2')
+		addEnvVar('CHANGE_TARGET', 'targetBranch')
+		addEnvVar('CHANGE_BRANCH', 'sourceBranch')
+
 		Script script = loadScript(SCRIPT_NAME)
 		script.execute()
 		printCallStack()
@@ -106,7 +121,7 @@ class JobHelperProgrammaticTest extends BasePipelineTest {
 
 	@Test
 	void trackingBranch() throws Exception {
-		binding.setVariable('env', new EnvStub(BRANCH_NAME: "tracking-foo"))
+		addEnvVar('BRANCH_NAME', 'tracking-foo')
 
 		jobConfigurationFile.tracking = [
 		        'foo': [
