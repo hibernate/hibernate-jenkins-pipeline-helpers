@@ -5,150 +5,199 @@
  * See the LICENSE.txt file in the root directory or <https://www.apache.org/licenses/LICENSE-2.0>.
  */
 
-import org.hibernate.jenkins.pipeline.helpers.version.Version
-import org.junit.Assert
-import org.junit.Assume
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
-@RunWith(Parameterized.class)
+import org.hibernate.jenkins.pipeline.helpers.version.Version
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
+
+import java.util.stream.Stream
+
+import static org.assertj.core.api.Assertions.assertThat
+import static org.assertj.core.api.Assertions.assertThatThrownBy
+import static org.junit.jupiter.api.Assumptions.assumeTrue
+
 class VersionTest {
 
-	@Parameterized.Parameters(name = "{0}")
-	static Version.Scheme[] params() {
-		return Version.Scheme.values() + [null]
+	static Stream<?> params() {
+		return Arrays.stream(Version.Scheme.values() + [null])
 	}
 
-	@Parameterized.Parameter
-	public Version.Scheme scheme
-
-	@Test
-	void release_valid() {
+	@ParameterizedTest
+	@MethodSource("params")
+	void release_valid(Version.Scheme scheme) {
 		if (!scheme || scheme == Version.Scheme.JBOSS_CLASSIC) {
-			testReleaseVersion('5.10.5.Final', '5', '10', '5', 'Final')
-			testReleaseVersion('6.0.0.Final', '6', '0', '0', 'Final')
+			testReleaseVersion('5.10.5.Final', scheme, '5', '10', '5', 'Final')
+			testReleaseVersion('6.0.0.Final', scheme, '6', '0', '0', 'Final')
 		}
 		else {
 			assert scheme == Version.Scheme.JBOSS_NO_FINAL
-			testReleaseVersion('5.10.5', '5', '10', '5', null)
-			testReleaseVersion('6.0.0', '6', '0', '0', null)
+			testReleaseVersion('5.10.5', scheme, '5', '10', '5', null)
+			testReleaseVersion('6.0.0', scheme, '6', '0', '0', null)
 		}
-		testReleaseVersion('6.0.0.Alpha1', '6', '0', '0', 'Alpha1')
-		testReleaseVersion('6.0.0.Alpha12', '6', '0', '0', 'Alpha12')
-		testReleaseVersion('6.0.0.Beta1', '6', '0', '0', 'Beta1')
-		testReleaseVersion('6.0.0.Beta12', '6', '0', '0', 'Beta12')
-		testReleaseVersion('6.0.0.CR1', '6', '0', '0', 'CR1')
-		testReleaseVersion('6.0.0.CR12', '6', '0', '0', 'CR12')
+		testReleaseVersion('6.0.0.Alpha1', scheme, '6', '0', '0', 'Alpha1')
+		testReleaseVersion('6.0.0.Alpha12', scheme, '6', '0', '0', 'Alpha12')
+		testReleaseVersion('6.0.0.Beta1', scheme, '6', '0', '0', 'Beta1')
+		testReleaseVersion('6.0.0.Beta12', scheme, '6', '0', '0', 'Beta12')
+		testReleaseVersion('6.0.0.CR1', scheme, '6', '0', '0', 'CR1')
+		testReleaseVersion('6.0.0.CR12', scheme, '6', '0', '0', 'CR12')
 	}
 
-	@Test
-	void development_valid() {
-		testDevelopmentVersion('5.10.5-SNAPSHOT', '5', '10', '5', null)
-		testDevelopmentVersion('6.0.0-SNAPSHOT', '6', '0', '0', null)
+	@ParameterizedTest
+	@MethodSource("params")
+	void development_valid(Version.Scheme scheme) {
+		testDevelopmentVersion('5.10.5-SNAPSHOT', scheme, '5', '10', '5', null)
+		testDevelopmentVersion('6.0.0-SNAPSHOT', scheme, '6', '0', '0', null)
 	}
 
-	@Test(expected = IllegalArgumentException)
-	void release_snapshot() {
-		doParseReleaseVersion('7.15.5-SNAPSHOT')
-	}
-
-	@Test(expected = IllegalArgumentException)
-	void release_missingFinalQualifier() {
-		Assume.assumeTrue("This test is only relevant for the JBOSS_CLASSIC version scheme",
-				scheme == null || scheme == Version.Scheme.JBOSS_CLASSIC)
-		doParseReleaseVersion('7.15.7')
-	}
-
-	@Test(expected = IllegalArgumentException)
-	void release_extraFinalQualifier() {
-		Assume.assumeTrue("This test is only relevant for the NO_FINAL version scheme",
-				scheme == Version.Scheme.JBOSS_NO_FINAL)
-		doParseReleaseVersion('7.15.7.Final')
-	}
-
-	@Test(expected = IllegalArgumentException)
-	void release_missingMicro() {
-		if (!scheme || scheme == Version.Scheme.JBOSS_CLASSIC) {
-			doParseReleaseVersion('7.15.Final')
+	@ParameterizedTest
+	@MethodSource("params")
+	void release_snapshot(Version.Scheme scheme) {
+		assertThatThrownBy {
+			doParseReleaseVersion('7.15.5-SNAPSHOT', scheme)
 		}
-		else {
-			assert scheme == Version.Scheme.JBOSS_NO_FINAL
-			doParseReleaseVersion('7.15')
+				.isInstanceOf(IllegalArgumentException)
+	}
+
+	@ParameterizedTest
+	@MethodSource("params")
+	void release_missingFinalQualifier(Version.Scheme scheme) {
+		assumeTrue(scheme == null || scheme == Version.Scheme.JBOSS_CLASSIC,
+				"This test is only relevant for the JBOSS_CLASSIC version scheme")
+		assertThatThrownBy {
+			doParseReleaseVersion('7.15.7', scheme)
 		}
+				.isInstanceOf(IllegalArgumentException)
 	}
 
-	@Test(expected = IllegalArgumentException)
-	void release_missingMinorAndMicro() {
-		if (!scheme || scheme == Version.Scheme.JBOSS_CLASSIC) {
-			doParseReleaseVersion('7.Final')
+	@ParameterizedTest
+	@MethodSource("params")
+	void release_extraFinalQualifier(Version.Scheme scheme) {
+		assumeTrue(scheme == Version.Scheme.JBOSS_NO_FINAL,
+				"This test is only relevant for the NO_FINAL version scheme")
+		assertThatThrownBy {
+			doParseReleaseVersion('7.15.7.Final', scheme)
 		}
-		else {
-			assert scheme == Version.Scheme.JBOSS_NO_FINAL
-			doParseReleaseVersion('7')
+				.isInstanceOf(IllegalArgumentException)
+	}
+
+	@ParameterizedTest
+	@MethodSource("params")
+	void release_missingMicro(Version.Scheme scheme) {
+		assertThatThrownBy {
+			if (!scheme || scheme == Version.Scheme.JBOSS_CLASSIC) {
+				doParseReleaseVersion('7.15.Final', scheme)
+			}
+			else {
+				assert scheme == Version.Scheme.JBOSS_NO_FINAL
+				doParseReleaseVersion('7.15', scheme)
+			}
 		}
+				.isInstanceOf(IllegalArgumentException)
 	}
 
-	@Test(expected = IllegalArgumentException)
-	void release_unknownQualifier() {
-		doParseReleaseVersion('7.15.5.Foo')
+	@ParameterizedTest
+	@MethodSource("params")
+	void release_missingMinorAndMicro(Version.Scheme scheme) {
+		assertThatThrownBy {
+			if (!scheme || scheme == Version.Scheme.JBOSS_CLASSIC) {
+				doParseReleaseVersion('7.Final', scheme)
+			}
+			else {
+				assert scheme == Version.Scheme.JBOSS_NO_FINAL
+				doParseReleaseVersion('7', scheme)
+			}
+		}
+				.isInstanceOf(IllegalArgumentException)
 	}
 
-	@Test(expected = IllegalArgumentException)
-	void release_finalQualifierWithNumber() {
-		doParseReleaseVersion('7.15.5.Final2')
+	@ParameterizedTest
+	@MethodSource("params")
+	void release_unknownQualifier(Version.Scheme scheme) {
+		assertThatThrownBy {
+			doParseReleaseVersion('7.15.5.Foo', scheme)
+		}
+				.isInstanceOf(IllegalArgumentException)
 	}
 
-	@Test(expected = IllegalArgumentException)
-	void release_nonZeroMicroForAlpha() {
-		doParseReleaseVersion('7.15.5.Alpha1')
+	@ParameterizedTest
+	@MethodSource("params")
+	void release_finalQualifierWithNumber(Version.Scheme scheme) {
+		assertThatThrownBy {
+			doParseReleaseVersion('7.15.5.Final2', scheme)
+		}
+				.isInstanceOf(IllegalArgumentException)
 	}
 
-	@Test(expected = IllegalArgumentException)
-	void release_nonZeroMicroForBeta() {
-		doParseReleaseVersion('7.15.5.Beta2')
+	@ParameterizedTest
+	@MethodSource("params")
+	void release_nonZeroMicroForAlpha(Version.Scheme scheme) {
+		assertThatThrownBy {
+			doParseReleaseVersion('7.15.5.Alpha1', scheme)
+		}
+				.isInstanceOf(IllegalArgumentException)
 	}
 
-	@Test(expected = IllegalArgumentException)
-	void release_nonZeroMicroForCR() {
-		doParseReleaseVersion('7.15.5.CR3')
+	@ParameterizedTest
+	@MethodSource("params")
+	void release_nonZeroMicroForBeta(Version.Scheme scheme) {
+		assertThatThrownBy {
+			doParseReleaseVersion('7.15.5.Beta2', scheme)
+		}
+				.isInstanceOf(IllegalArgumentException)
 	}
 
-	@Test(expected = IllegalArgumentException)
-	void development_nosnapshot() {
-		doParseDevelopmentVersion('7.15.5')
+	@ParameterizedTest
+	@MethodSource("params")
+	void release_nonZeroMicroForCR(Version.Scheme scheme) {
+		assertThatThrownBy {
+			doParseReleaseVersion('7.15.5.CR3', scheme)
+		}
+				.isInstanceOf(IllegalArgumentException)
 	}
 
-	@Test(expected = IllegalArgumentException)
-	void development_extraQualifier() {
-		doParseDevelopmentVersion('7.15.5.Final-SNAPSHOT')
+	@ParameterizedTest
+	@MethodSource("params")
+	void development_nosnapshot(Version.Scheme scheme) {
+		assertThatThrownBy {
+			doParseDevelopmentVersion('7.15.5', scheme)
+		}
+				.isInstanceOf(IllegalArgumentException)
 	}
 
-	private Version doParseReleaseVersion(String versionString) {
+	@ParameterizedTest
+	@MethodSource("params")
+	void development_extraQualifier(Version.Scheme scheme) {
+		assertThatThrownBy {
+			doParseDevelopmentVersion('7.15.5.Final-SNAPSHOT', scheme)
+		}
+				.isInstanceOf(IllegalArgumentException)
+	}
+
+	private Version doParseReleaseVersion(String versionString, Version.Scheme scheme) {
 		scheme ? Version.parseReleaseVersion(versionString, scheme) : Version.parseReleaseVersion(versionString)
 	}
 
-	private Version doParseDevelopmentVersion(String versionString) {
+	private Version doParseDevelopmentVersion(String versionString, Version.Scheme scheme) {
 		scheme ? Version.parseDevelopmentVersion(versionString, scheme) : Version.parseDevelopmentVersion(versionString)
 	}
 
-	private void testReleaseVersion(String versionString, String major, String minor, String micro, String qualifier) {
-		Version version = doParseReleaseVersion(versionString)
+	private void testReleaseVersion(String versionString, Version.Scheme scheme, String major, String minor, String micro, String qualifier) {
+		Version version = doParseReleaseVersion(versionString, scheme)
 		assertVersion(version, versionString, major, minor, micro, qualifier, false)
 	}
 
-	private void testDevelopmentVersion(String versionString, String major, String minor, String micro, String qualifier) {
-		Version version = doParseDevelopmentVersion(versionString)
+	private void testDevelopmentVersion(String versionString, Version.Scheme scheme, String major, String minor, String micro, String qualifier) {
+		Version version = doParseDevelopmentVersion(versionString, scheme)
 		assertVersion(version, versionString, major, minor, micro, qualifier, true)
 	}
 
-	private void assertVersion(Version version, String toString, String major, String minor, String micro, String qualifier, boolean snapshot) {
-		Assert.assertEquals(toString, version.toString())
-		Assert.assertEquals(major, version.major)
-		Assert.assertEquals(minor, version.minor)
-		Assert.assertEquals(micro, version.micro)
-		Assert.assertEquals(qualifier, version.qualifier)
-		Assert.assertEquals(snapshot, version.snapshot)
+	private static void assertVersion(Version version, String toString, String major, String minor, String micro, String qualifier, boolean snapshot) {
+		assertThat(toString).isEqualTo(version.toString())
+		assertThat(major).isEqualTo(version.major)
+		assertThat(minor).isEqualTo(version.minor)
+		assertThat(micro).isEqualTo(version.micro)
+		assertThat(qualifier).isEqualTo(version.qualifier)
+		assertThat(snapshot).isEqualTo(version.snapshot)
 	}
 
 }

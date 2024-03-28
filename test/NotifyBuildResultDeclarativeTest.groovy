@@ -7,9 +7,9 @@
 
 import com.lesfurets.jenkins.unit.declarative.DeclarativePipelineTest
 import jenkinsapis.GitScmStub
-import org.junit.Before
-import org.junit.Ignore
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
 
 import static com.lesfurets.jenkins.unit.global.lib.LibraryConfiguration.library
 import static com.lesfurets.jenkins.unit.global.lib.LocalSource.localSource
@@ -28,7 +28,7 @@ class NotifyBuildResultDeclarativeTest extends DeclarativePipelineTest {
 	boolean doStuffShouldSucceed = true
 
 	@Override
-	@Before
+	@BeforeEach
 	void setUp() throws Exception {
 		setScriptRoots(['src', 'test', 'vars'] as String[])
 		setScriptExtension('groovy')
@@ -78,7 +78,7 @@ class NotifyBuildResultDeclarativeTest extends DeclarativePipelineTest {
 	}
 
 	@Test
-	@Ignore // post() doesn't work in case of failures due to a bug in the testing framework: https://github.com/jenkinsci/JenkinsPipelineUnit/issues/338
+	@Disabled // post() doesn't work in case of failures due to a bug in the testing framework: https://github.com/jenkinsci/JenkinsPipelineUnit/issues/338
 	void branch_failure() throws Exception {
 		addEnvVar('BRANCH_NAME', 'branch_name')
 		doStuffShouldSucceed = false
@@ -99,7 +99,7 @@ class NotifyBuildResultDeclarativeTest extends DeclarativePipelineTest {
 	}
 
 	@Test
-	@Ignore // post() doesn't work in case of failures due to a bug in the testing framework: https://github.com/jenkinsci/JenkinsPipelineUnit/issues/338
+	@Disabled // post() doesn't work in case of failures due to a bug in the testing framework: https://github.com/jenkinsci/JenkinsPipelineUnit/issues/338
 	void pullRequest_failure() throws Exception {
 		addEnvVar('CHANGE_ID', 'PR 2')
 		addEnvVar('CHANGE_TARGET', 'targetBranch')
@@ -126,7 +126,7 @@ class NotifyBuildResultDeclarativeTest extends DeclarativePipelineTest {
 	}
 
 	@Test
-	@Ignore // post() doesn't work in case of failures due to a bug in the testing framework: https://github.com/jenkinsci/JenkinsPipelineUnit/issues/338
+	@Disabled // post() doesn't work in case of failures due to a bug in the testing framework: https://github.com/jenkinsci/JenkinsPipelineUnit/issues/338
 	void trackingBranch_failure() throws Exception {
 		addEnvVar('BRANCH_NAME', 'tracking-foo')
 		jobConfigurationFile.tracking = [
