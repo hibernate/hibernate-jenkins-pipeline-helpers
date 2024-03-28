@@ -6,7 +6,6 @@
  */
 
 import com.lesfurets.jenkins.unit.declarative.DeclarativePipelineTest
-import jenkinsapis.EnvStub
 import jenkinsapis.GitScmStub
 import org.junit.Before
 import org.junit.Ignore
@@ -31,7 +30,7 @@ class NotifyBuildResultDeclarativeTest extends DeclarativePipelineTest {
 	@Override
 	@Before
 	void setUp() throws Exception {
-		setScriptRoots([ 'src', 'test', 'vars' ] as String[])
+		setScriptRoots(['src', 'test', 'vars'] as String[])
 		setScriptExtension('groovy')
 
 		super.setUp()
@@ -46,6 +45,11 @@ class NotifyBuildResultDeclarativeTest extends DeclarativePipelineTest {
 				.implicit(false)
 				.build()
 		helper.registerSharedLibrary(library)
+	}
+
+	@Override
+	void registerAllowedMethods() {
+		super.registerAllowedMethods()
 
 		helper.registerAllowedMethod("post", [Closure])
 		helper.registerAllowedMethod("always", [Closure])
@@ -66,8 +70,9 @@ class NotifyBuildResultDeclarativeTest extends DeclarativePipelineTest {
 
 	@Test
 	void branch_success() throws Exception {
-		binding.setVariable('env', new EnvStub())
+		addEnvVar('BRANCH_NAME', 'branch_name')
 		doStuffShouldSucceed = true
+
 		def script = runScript(SCRIPT_NAME)
 		assertJobStatusSuccess()
 	}
@@ -75,16 +80,20 @@ class NotifyBuildResultDeclarativeTest extends DeclarativePipelineTest {
 	@Test
 	@Ignore // post() doesn't work in case of failures due to a bug in the testing framework: https://github.com/jenkinsci/JenkinsPipelineUnit/issues/338
 	void branch_failure() throws Exception {
-		binding.setVariable('env', new EnvStub())
+		addEnvVar('BRANCH_NAME', 'branch_name')
 		doStuffShouldSucceed = false
+
 		def script = runScript(SCRIPT_NAME)
 		assertJobStatusFailure()
 	}
 
 	@Test
 	void pullRequest_success() throws Exception {
-		binding.setVariable('env', new EnvStub(CHANGE_ID: "PR 2", CHANGE_TARGET: "targetBranch", CHANGE_BRANCH: "sourceBranch"))
+		addEnvVar('CHANGE_ID', 'PR 2')
+		addEnvVar('CHANGE_TARGET', 'targetBranch')
+		addEnvVar('CHANGE_BRANCH', 'sourceBranch')
 		doStuffShouldSucceed = true
+
 		def script = runScript(SCRIPT_NAME)
 		assertJobStatusSuccess()
 	}
@@ -92,24 +101,26 @@ class NotifyBuildResultDeclarativeTest extends DeclarativePipelineTest {
 	@Test
 	@Ignore // post() doesn't work in case of failures due to a bug in the testing framework: https://github.com/jenkinsci/JenkinsPipelineUnit/issues/338
 	void pullRequest_failure() throws Exception {
-		binding.setVariable('env', new EnvStub(CHANGE_ID: "PR 2", CHANGE_TARGET: "targetBranch", CHANGE_BRANCH: "sourceBranch"))
+		addEnvVar('CHANGE_ID', 'PR 2')
+		addEnvVar('CHANGE_TARGET', 'targetBranch')
+		addEnvVar('CHANGE_BRANCH', 'sourceBranch')
 		doStuffShouldSucceed = false
+
 		def script = runScript(SCRIPT_NAME)
 		assertJobStatusFailure()
 	}
 
 	@Test
 	void trackingBranch_success() throws Exception {
-		binding.setVariable('env', new EnvStub(BRANCH_NAME: "tracking-foo"))
-
+		addEnvVar('BRANCH_NAME', 'tracking-foo')
 		jobConfigurationFile.tracking = [
 		        'foo': [
 						'base': 'base-branch',
 						'tracked': ['tracked-job-1', 'tracked-job-2']
 		        ]
 		]
-
 		doStuffShouldSucceed = true
+
 		def script = runScript(SCRIPT_NAME)
 		assertJobStatusSuccess()
 	}
@@ -117,16 +128,15 @@ class NotifyBuildResultDeclarativeTest extends DeclarativePipelineTest {
 	@Test
 	@Ignore // post() doesn't work in case of failures due to a bug in the testing framework: https://github.com/jenkinsci/JenkinsPipelineUnit/issues/338
 	void trackingBranch_failure() throws Exception {
-		binding.setVariable('env', new EnvStub(BRANCH_NAME: "tracking-foo"))
-
+		addEnvVar('BRANCH_NAME', 'tracking-foo')
 		jobConfigurationFile.tracking = [
 				'foo': [
 						'base': 'base-branch',
 						'tracked': ['tracked-job-1', 'tracked-job-2']
 				]
 		]
-
 		doStuffShouldSucceed = false
+
 		def script = runScript(SCRIPT_NAME)
 		assertJobStatusSuccess()
 	}
