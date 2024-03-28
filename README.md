@@ -7,10 +7,10 @@ See below for documentation of the helpers.
 See near the bottom of this file for help writing Groovy in a Jenkinsfile environment,
 be it a Jenkinsfile or a shared library like this one.
 
-## Using the helper steps (declarative pipelines)
+## Using the helper steps (declarative or programmatic pipelines)
 
 This library provides a set of helper steps that can come in handy
-in progammatic pipelines.
+in both declarative and programmatic pipelines.
 
 ### notifyBuildResult
 
@@ -22,7 +22,7 @@ notifyBuildResult(
    * Space-separated emails of maintainers to notify of build results on primary branches.
    * Optional, defaults to empty.
    */
-  maintainers: "foo@example.com bar@example.com"
+  maintainers: "foo@example.com bar@example.com",
   /**
    * Whether maintainers should always be notified.
    * Optional, defaults to false.
