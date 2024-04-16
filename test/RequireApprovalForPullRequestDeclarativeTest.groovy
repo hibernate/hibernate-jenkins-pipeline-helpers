@@ -77,7 +77,8 @@ class RequireApprovalForPullRequestDeclarativeTest extends DeclarativePipelineTe
 	void branch_noApprovalRequired() throws Exception {
 		def script = runScript(SCRIPT_NAME)
 		assertJobStatusSuccess()
-		assertCallStack().contains('no approval required')
+		assertCallStack().doesNotContain('Approval is required')
+		assertCallStack().contains('No approval required')
 	}
 
 	@Test
@@ -90,7 +91,8 @@ class RequireApprovalForPullRequestDeclarativeTest extends DeclarativePipelineTe
 
 		def script = runScript(SCRIPT_NAME)
 		assertJobStatusSuccess()
-		assertCallStack().contains('no approval required')
+		assertCallStack().doesNotContain('Approval is required')
+		assertCallStack().contains('No approval required')
 	}
 
 	@Test
@@ -103,7 +105,8 @@ class RequireApprovalForPullRequestDeclarativeTest extends DeclarativePipelineTe
 
 		def script = runScript(SCRIPT_NAME)
 		assertJobStatusSuccess()
-		assertCallStack().doesNotContain('no approval required')
+		assertCallStack().contains('Approval is required')
+		assertCallStack().doesNotContain('No approval required')
 	}
 
 	@Test
@@ -113,7 +116,8 @@ class RequireApprovalForPullRequestDeclarativeTest extends DeclarativePipelineTe
 
 		def script = runScript(SCRIPT_NAME)
 		assertJobStatusSuccess()
-		assertCallStack().contains('no approval required')
+		assertCallStack().doesNotContain('Approval is required')
+		assertCallStack().contains('No approval required')
 	}
 
 	@Test
@@ -123,6 +127,7 @@ class RequireApprovalForPullRequestDeclarativeTest extends DeclarativePipelineTe
 
 		def script = runScript(SCRIPT_NAME)
 		assertJobStatusSuccess()
-		assertCallStack().doesNotContain('no approval required')
+		assertCallStack().contains('Approval is required')
+		assertCallStack().doesNotContain('No approval required')
 	}
 }
