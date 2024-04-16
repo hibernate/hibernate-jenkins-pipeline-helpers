@@ -36,7 +36,7 @@ boolean needsApproval(String approvalGroup) {
 }
 
 
-static boolean isMember(String userId, String groupId) {
+boolean isMember(String userId, String groupId) {
 	def user = User.getById(userId, false)
 	if (!user) {
 		echo "Jenkins user '${userId}' does not exist (maybe they never logged in on this Jenkins instance?)"
