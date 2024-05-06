@@ -1,15 +1,13 @@
 import hudson.model.Cause
 import hudson.model.User
 
-import java.util.stream.Collectors
-
 def call(String approvalGroup) {
 	StringBuilder log = new StringBuilder()
 	boolean requireApproval = needsApproval(log, approvalGroup)
 
 	def reason = log.toString().lines()
-			.map({ it -> '    ' + it })
-			.collect(Collectors.joining('\n'))
+			.collect({ it -> '    ' + it })
+			.join('\n')
 	if (!requireApproval) {
 		echo """No approval required.
 Reason:
