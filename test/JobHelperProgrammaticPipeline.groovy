@@ -60,8 +60,8 @@ def execute() {
 			def releaseVersion = Version.parseReleaseVersion('5.10.2.Final')
 			def developmentVersion = Version.parseDevelopmentVersion('5.10.3-SNAPSHOT')
 
-			echo "Release version: $releaseVersion, family: $releaseVersion.family"
-			echo "Development version: $developmentVersion, family: $developmentVersion.family"
+			echo "Release version: $releaseVersion, family: $releaseVersion.family, unqualified: $releaseVersion.unqualified"
+			echo "Development version: $developmentVersion, family: $developmentVersion.family, unqualified: $developmentVersion.unqualified"
 		}
 
 		stage('Build') {

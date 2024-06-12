@@ -66,4 +66,8 @@ class Version {
 	String getFamily() {
 		"$major.$minor"
 	}
+
+	String getUnqualified() {
+		"$major.$minor.$micro"
+	}
 }
