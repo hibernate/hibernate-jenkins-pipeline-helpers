@@ -7,6 +7,8 @@
 
 
 import org.hibernate.jenkins.pipeline.helpers.version.Version
+
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 
@@ -20,6 +22,13 @@ class VersionTest {
 
 	static Stream<?> params() {
 		return Arrays.stream(Version.Scheme.values() + [null])
+	}
+
+	@Test
+	void releaseCR() {
+		testReleaseVersion('6.6.0.CR1', null, '6', '6', '0', 'CR1')
+		assertThat( doParseReleaseVersion('6.6.0.CR1', null).toString() ).startsWith( doParseDevelopmentVersion('6.6.0-SNAPSHOT', null).family + '.' )
+		assertThat( doParseReleaseVersion('6.6.0.CR1', null).getTagName() ).isEqualTo( "6.6.0.CR1" )
 	}
 
 	@ParameterizedTest
@@ -193,6 +202,7 @@ class VersionTest {
 
 	private static void assertVersion(Version version, String toString, String major, String minor, String micro, String qualifier, boolean snapshot) {
 		assertThat(toString).isEqualTo(version.toString())
+		assertThat(toString).startsWith(version.family)
 		assertThat(major).isEqualTo(version.major)
 		assertThat(minor).isEqualTo(version.minor)
 		assertThat(micro).isEqualTo(version.micro)

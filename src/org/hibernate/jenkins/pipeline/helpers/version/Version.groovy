@@ -73,4 +73,8 @@ class Version {
 	String getUnqualified() {
 		"$major.$minor.$micro"
 	}
+
+	String getTagName() {
+		"$major.$minor.$micro" + (qualifier == null || qualifier == 'Final' ? '' : ".$qualifier")
+	}
 }
