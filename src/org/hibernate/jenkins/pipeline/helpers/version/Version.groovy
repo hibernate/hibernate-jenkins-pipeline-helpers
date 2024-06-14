@@ -8,6 +8,8 @@ package org.hibernate.jenkins.pipeline.helpers.version
 
 import java.util.regex.Pattern
 
+import com.cloudbees.groovy.cps.NonCPS
+
 class Version {
 
 	enum Scheme {
@@ -58,6 +60,7 @@ class Version {
 		this.snapshot = snapshot
 	}
 
+	@NonCPS
 	@Override
 	String toString() {
 		[major, minor, micro, qualifier].findAll({ it != null }).join('.') + (snapshot ? '-SNAPSHOT' : '')
