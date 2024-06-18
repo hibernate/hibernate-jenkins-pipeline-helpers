@@ -28,8 +28,16 @@ class VersionTest {
 	void releaseCR() {
 		testReleaseVersion('6.6.0.CR1', null, '6', '6', '0', 'CR1')
 		assertThat( doParseReleaseVersion('6.6.0.CR1', null).toString() ).startsWith( doParseDevelopmentVersion('6.6.0-SNAPSHOT', null).family + '.' )
-		assertThat( doParseReleaseVersion('6.6.0.CR1', null).getWithoutFinalQualifier() ).isEqualTo( "6.6.0.CR1" )
-		assertThat( doParseReleaseVersion('6.6.0.CR1', null).getTagName() ).isEqualTo( "6.6.0.CR1" )
+		assertThat( doParseReleaseVersion('6.6.0.CR1', null).withoutFinalQualifier ).isEqualTo( "6.6.0.CR1" )
+		assertThat( doParseReleaseVersion('6.6.0.CR1', null).tagName ).isEqualTo( "6.6.0.CR1" )
+	}
+
+	@Test
+	void releaseFinal() {
+		testReleaseVersion('6.6.0.Final', null, '6', '6', '0', 'Final')
+		assertThat( doParseReleaseVersion('6.6.0.Final', null).toString() ).startsWith( doParseDevelopmentVersion('6.6.1-SNAPSHOT', null).family + '.' )
+		assertThat( doParseReleaseVersion('6.6.0.Final', null).withoutFinalQualifier ).isEqualTo( "6.6.0" )
+		assertThat( doParseReleaseVersion('6.6.0.Final', null).tagName ).isEqualTo( "6.6.0" )
 	}
 
 	@ParameterizedTest
