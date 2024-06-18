@@ -28,6 +28,7 @@ class VersionTest {
 	void releaseCR() {
 		testReleaseVersion('6.6.0.CR1', null, '6', '6', '0', 'CR1')
 		assertThat( doParseReleaseVersion('6.6.0.CR1', null).toString() ).startsWith( doParseDevelopmentVersion('6.6.0-SNAPSHOT', null).family + '.' )
+		assertThat( doParseReleaseVersion('6.6.0.CR1', null).getWithoutFinalQualifier() ).isEqualTo( "6.6.0.CR1" )
 		assertThat( doParseReleaseVersion('6.6.0.CR1', null).getTagName() ).isEqualTo( "6.6.0.CR1" )
 	}
 

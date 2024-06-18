@@ -74,7 +74,12 @@ class Version {
 		"$major.$minor.$micro"
 	}
 
-	String getTagName() {
+	String getWithoutFinalQualifier() {
 		"$major.$minor.$micro" + (qualifier == null || qualifier == 'Final' ? '' : ".$qualifier")
+	}
+
+	@Deprecated
+	String getTagName() {
+		getWithoutFinalQualifier()
 	}
 }
