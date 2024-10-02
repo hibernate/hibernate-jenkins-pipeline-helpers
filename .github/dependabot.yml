@@ -5,10 +5,24 @@ updates:
     schedule:
       interval: monthly
     groups:
-      maven-plugins:
+      runtime-dependencies:
         patterns:
+          - "org.jenkins-ci.main:*"
+          - "org.jenkins-ci.plugins:*"
+          - "com.cloudbees:groovy-cps"
+          - "org.codehaus.groovy:*"
+      build-dependencies:
+        patterns:
+          # Maven plugins:
           - "*maven*plugin*"
           - "org.apache.maven*:*"
+          - "*surefire*"
+          - "*forbiddenapis*"
+          # Other test dependencies:
+          - "org.junit:*"
+          - "org.mockito:*"
+          - "com.lesfurets:*"
+          - "javax.servlet:*"
     ignore:
       - dependency-name: "org.codehaus.groovy:*"
         # Jenkins is stuck on Groovy 2
