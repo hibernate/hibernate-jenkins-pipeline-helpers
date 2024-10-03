@@ -196,6 +196,19 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <!-- Mockito agent for mocking of static methods -->
+                            <!-- See https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.3 -->
+                            <goal>properties</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.0</version>
                 <configuration>
@@ -204,6 +217,9 @@
                     <includes>
                         <include>**/*Test.class</include>
                     </includes>
+                    <!-- Mockito agent for mocking of static methods -->
+                    <!-- See https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.3 -->
+                    <argLine>-javaagent:${org.mockito:mockito-core:jar}</argLine>
                 </configuration>
                 <executions>
                     <execution>
