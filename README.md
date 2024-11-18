@@ -7,6 +7,8 @@ See below for documentation of the helpers.
 See near the bottom of this file for help writing Groovy in a Jenkinsfile environment,
 be it a Jenkinsfile or a shared library like this one.
 
+You will also need to [configure your Jenkins instance](#jenkins-configuration).
+
 ## Using the helper steps (declarative or programmatic pipelines)
 
 This library provides a set of helper steps that can come in handy
@@ -50,16 +52,34 @@ notifyBuildResult(
 ## Using the helper classes (programmatic pipelines)
 
 This library provides a set of helper classes that can come in handy
-in progammatic pipelines.
+in programmatic pipelines.
 
 See the content of the `execute()` method in `test/SmokePipeline.groovy`
 for an example of how the helpers are expected to be configured and used.
 
-## Required configuration
+## Setup
 
-### Jenkins configuration
+### `Jenkinsfile`
 
-#### Required plugins
+In order to use this library, you need to explicitly import it into your Jenkinsfile, by adding this near the top (~before imports):
+
+```groovy
+@Library('hibernate-jenkins-pipeline-helpers') _
+```
+
+This relies on the library being [defined in the Jenkins instance](#jenkins-configuration-definition).
+
+### <a id="jenkins-configuration" /> Jenkins configuration
+
+### <a id="jenkins-configuration-definition" /> Library definition and version
+
+In order for `@Library` to work, you will need to define it in your Jenkins instance.
+See [here](https://www.jenkins.io/doc/book/pipeline/shared-libraries/#defining-shared-libraries) for details.
+
+For https://ci.hibernate.org, we define the library [globally](https://www.jenkins.io/doc/book/pipeline/shared-libraries/#global-shared-libraries),
+so that we can set the (default) version globally [here](https://ci.hibernate.org/manage/configure#global-untrusted-pipeline-libraries).
+
+### Required plugins
 
  - https://plugins.jenkins.io/pipeline-maven
  - https://plugins.jenkins.io/email-ext
@@ -67,7 +87,7 @@ for an example of how the helpers are expected to be configured and used.
  - https://plugins.jenkins.io/pipeline-utility-steps for YAML reading
  - https://plugins.jenkins.io/notification for Gitter notifications
 
-#### Script approval
+### Script approval
 
 If not already done, you will need to allow the following calls in <jenkinsUrl>/scriptApproval/:
 
@@ -83,15 +103,13 @@ If not already done, you will need to allow the following calls in <jenkinsUrl>/
 
 Just run the script a few times, it will fail and logs will display a link to allow these calls.
 
-### Job configuration
+## Conventions
 
-#### Branch name
-
-##### "primary" branches
+### "primary" branches
 Branches named "main", "master" or matching the regex `/[0-9]+.[0-9]+/` will be considered as "primary" branches,
 and, depending on the Jenkinsfile, may undergo additional testing.
 
-##### "tracking" branches
+### "tracking" branches
 Branches named "tracking-<some-name>" will be considered as "tracking branches",
 i.e. branches containing a patch to be applied regularly
 on top of a base branch, whenever that base branch changes, or another job succeeds.
@@ -104,7 +122,7 @@ In a multibranch pipeline, the specific job for each tracking branch will be con
 
 Also, when such branches are built, they are automatically merged with the base branch.
 
-#### Job configuration file
+### Job configuration file
 
 The job configuration file is optional. Its purpose is to host job-specific configuration, such as notification recipients.
 
@@ -147,68 +165,6 @@ tracking:
       - <other job name>
 ```
 
-## Writing Groovy in Jenkins
+## Contributing & writing Jenkinsfiles
 
-[This page on our Jenkins instance](http://ci.hibernate.org/pipeline-syntax/) helps when you want to add a call to a pipeline step:
-it will provide you with a GUI to generate a call.
- 
-More generally, see [this part of the Jenkins documentation](https://jenkins.io/doc/book/pipeline/development/#pipeline-development-tools)
-for resources that will help you write Jenkinsfiles.
-
-### Making changes to this library
-
-Documentation on shared libraries in Jenkins pipelines can be found [there](https://jenkins.io/doc/book/pipeline/shared-libraries/).
-
-This project include smoke tests; run `mvn clean test` to execute them.
-The tests won't do much, but will display the resulting call tree,
-which can be helpful when debugging.
-Be aware that the tests don't replicate a full Jenkins environment (no sandboxing in particular),
-thus testing on Jenkins itself is still necessary.
-
-To release changes: `mvn release:prepare && mvn release:perform`
-
-### Known limitations
-
-- Constructors should never, ever call a method defined in your Jenkinsfile script.
-This apparently has to do with the transformations the interpreter applies to methods
-so that they can be executed as "continuations", which requires transformations on both
-the declaration site and call site in order to work.
-Constructors are not transformed, so they can't call such transformed methods.
-- `.with` cannot be used, because it requires to use reflection,
-which is disallowed in Jenkinsfile, probably because it would allow to bypass the sandbox. 
-- Nested classes support is quite bad. In particular:
-  - [you cannot reference an inner class (`ParentClass.NestedClass`) from another class](https://issues.jenkins-ci.org/browse/JENKINS-41896).
-  - you cannot used "qualified this", e.g. `ParentClass.this`.
-- Behavioral annotations such as `@Delegate`, `@Immutable`, etc. are unlikely to work.
-- Static type checking (`@TypeChecked`) is not recommended since it will cause cryptic errors.
-- Closure support is limited. In particular:
-  - `closure.rehydrate(...)` will not work. 
-The resulting copy of the closure will execute, but any of its calls to
-will be silently ignored.
-You should just set the delegate of the original closure (`closure.delegate = ...`).
-  - Only the default "resolveStrategy" can be expected to work correctly,
-because other strategies rely on reflection (`GroovyObject.invoke(String, Map)`
-or `GroovyObject.getProperty(String)`), which are not safe to execute in the
-Jenkins sandbox.
-- `java.util.Set` should be avoided, because at least some methods don't work correctly in Jenkins.
-In particular, `removeAll` has no effect whatsoever. `java.util.List` works fine.
-
-
-### Troubleshooting
-
-```
-org.jenkinsci.plugins.scriptsecurity.sandbox.RejectedAccessException: Scripts not permitted to use method groovy.lang.GroovyObject getProperty java.lang.String (path.to.some.Class.someProperty)
-```
-
-Check that the property exists, and that there's no typo.
-The interpreted apparently defaults to using reflection when unknown methods/properties are referenced.
-
-
-```
-hudson.remoting.ProxyException: com.cloudbees.groovy.cps.impl.CpsCallableInvocation
-```
-
-Check that you're not executing a method inside a constructor (see "Known limitations").
-This includes calling methods from field initializers (`@Field String myField = someObject.someMethod()`).
-
-Move the method execution to the body of the script if necessary.
+See `CONTRIBUTING.md`.
