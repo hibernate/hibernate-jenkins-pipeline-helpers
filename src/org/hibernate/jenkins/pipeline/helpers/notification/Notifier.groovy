@@ -33,7 +33,9 @@ class Notifier {
 			if (script.env.CHANGE_ID) {
 				// PR build: notify the authors of the changeset.
 				recipientProviders.add(script.developers())
-				recipientProviders.add(script.culprits())
+				// This seems to notify unrelated people, so avoid it.
+				// See https://hibernate.zulipchat.com/#narrow/channel/132096-hibernate-user/topic/Jenkins.20Notifications
+				//recipientProviders.add(script.culprits())
 			}
 			else {
 				// Non-PR builds: notify maintainers.
