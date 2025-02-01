@@ -52,7 +52,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-bom</artifactId>
-                <version>5.14.2</version>
+                <version>5.15.2</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -164,7 +164,7 @@
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>4.1.0</version>
+                <version>4.1.1</version>
                 <configuration>
                     <sources>
                         <source>
