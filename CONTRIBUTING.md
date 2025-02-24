@@ -1,5 +1,17 @@
 # Contributing
 
+## Legal
+
+You should check the relevant license under which all contributions will be licensed for the specific project you are contributing to.
+
+All contributions are subject to the [Developer Certificate of Origin (DCO)](https://developercertificate.org/).
+
+The DCO text is available verbatim in the [dco.txt](dco.txt) file.
+
+## Guidelines
+
+See https://hibernate.org/community/contribute/.
+
 ## Releasing
 
 To release changes: `mvn release:prepare && mvn release:perform`.
