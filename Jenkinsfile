@@ -6,7 +6,7 @@ pipeline {
     }
     tools {
         maven 'Apache Maven 3.9'
-        jdk 'OpenJDK 17 Latest'
+        jdk 'OpenJDK 21 Latest'
     }
     stages {
         stage('Build') {
