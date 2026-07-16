@@ -1,11 +1,7 @@
 import hudson.model.Cause
 import hudson.model.User
-import jenkins.scm.api.SCMSource
-import org.jenkinsci.plugins.github_branch_source.Connector
-import org.jenkinsci.plugins.github_branch_source.GitHubSCMSource
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
 import org.jenkinsci.plugins.workflow.steps.TimeoutStepExecution
-import org.kohsuke.github.GHEvent
 
 def call(String approvalGroup) {
 	call(approvalGroup, [:])
@@ -32,9 +28,9 @@ ${reason}
 	// Try the GHA-aware approval flow.
 	// On any unexpected error, fall back to the plain input step (old behavior).
 	try {
-		def ghConfig = getGitHubSCMConfig()
-		if (ghConfig != null && env.CHANGE_ID) {
-			if (waitForGHAOrManualApproval(approvalGroup, args, ghConfig, reason)) {
+		def repoInfo = parseChangeUrl()
+		if (repoInfo != null && env.CHANGE_ID) {
+			if (waitForGHAOrManualApproval(approvalGroup, args, repoInfo, reason)) {
 				return
 			}
 		}
@@ -49,14 +45,31 @@ ${reason}
 	showInputForApproval(approvalGroup, reason, null)
 }
 
-private boolean waitForGHAOrManualApproval(String approvalGroup, Map args, Map ghConfig, String reason) {
-	def prInfo = doFetchPrInfo(ghConfig)
+private Map parseChangeUrl() {
+	def changeUrl = env.CHANGE_URL
+	if (!changeUrl) {
+		return null
+	}
+	def match = (changeUrl =~ 'https?://([^/]+)/([^/]+)/([^/]+)/pull/\\d+')
+	if (!match.matches()) {
+		return null
+	}
+	def host = match.group(1)
+	def apiUri = (host == 'github.com') ? 'https://api.github.com' : "https://${host}/api/v3"
+	return [
+		apiUri      : apiUri,
+		repoFullName: "${match.group(2)}/${match.group(3)}"
+	]
+}
+
+private boolean waitForGHAOrManualApproval(String approvalGroup, Map args, Map repoInfo, String reason) {
+	def prInfo = fetchPrInfo(repoInfo)
 	def sha = prInfo?.sha
 	if (!sha) {
 		return false
 	}
 
-	if (doCheckGHAWorkflowRuns(ghConfig, sha)) {
+	if (checkGHAWorkflowRuns(repoInfo, sha)) {
 		echo "Approved: GitHub Actions workflow runs found for commit ${sha}"
 		return true
 	}
@@ -81,12 +94,12 @@ private boolean waitForGHAOrManualApproval(String approvalGroup, Map args, Map g
 		}
 
 		try {
-			if (doCheckGHAWorkflowRuns(ghConfig, sha)) {
+			if (checkGHAWorkflowRuns(repoInfo, sha)) {
 				echo "Approved: GitHub Actions workflow runs found for commit ${sha}"
 				return true
 			}
 
-			prInfo = doFetchPrInfo(ghConfig)
+			prInfo = fetchPrInfo(repoInfo)
 			if (lastPrUpdatedAt != null && prInfo?.updatedAt != null
 					&& prInfo.updatedAt != lastPrUpdatedAt) {
 				echo "PR activity detected — resetting check interval"
@@ -121,62 +134,26 @@ private boolean isTimeout(FlowInterruptedException e) {
 	return e.getCauses()?.getAt(0) instanceof TimeoutStepExecution.ExceededTimeout
 }
 
-// ---------- GitHub API ----------
+// ---------- GitHub API via httpRequest ----------
 
-@NonCPS
-private Map getGitHubSCMConfig() {
-	def job = currentBuild.rawBuild?.parent
-	if (job == null) {
-		return null
-	}
-	def scmSource = SCMSource.SourceByItem.findSource(job)
-	if (!(scmSource instanceof GitHubSCMSource)) {
-		return null
-	}
-	return [
-		credentialsId: scmSource.credentialsId,
-		apiUri       : scmSource.apiUri ?: 'https://api.github.com',
-		repoFullName : "${scmSource.repoOwner}/${scmSource.repository}",
-		repoOwner    : scmSource.repoOwner
-	]
+private Map fetchPrInfo(Map repoInfo) {
+	def content = httpRequest(
+			url: "${repoInfo.apiUri}/repos/${repoInfo.repoFullName}/pulls/${env.CHANGE_ID}",
+			validResponseCodes: '200',
+			quiet: true
+	).content
+	def json = new groovy.json.JsonSlurper().parseText(content)
+	return [sha: json.head?.sha, updatedAt: json.updated_at]
 }
 
-@NonCPS
-private Map doFetchPrInfo(Map ghConfig) {
-	def github = connectToGitHub(ghConfig)
-	try {
-		def repo = github.getRepository(ghConfig.repoFullName)
-		def pr = repo.getPullRequest(env.CHANGE_ID as int)
-		return [sha: pr.head.sha, updatedAt: pr.updatedAt?.toString()]
-	} finally {
-		Connector.release(github)
-	}
-}
-
-@NonCPS
-private boolean doCheckGHAWorkflowRuns(Map ghConfig, String sha) {
-	def github = connectToGitHub(ghConfig)
-	try {
-		def repo = github.getRepository(ghConfig.repoFullName)
-		def iterator = repo.queryWorkflowRuns()
-				.headSha(sha)
-				.event(GHEvent.PULL_REQUEST)
-				.list()
-				.withPageSize(1)
-				.iterator()
-		return iterator.hasNext()
-	} finally {
-		Connector.release(github)
-	}
-}
-
-@NonCPS
-private connectToGitHub(Map ghConfig) {
-	def job = currentBuild.rawBuild?.parent
-	def creds = Connector.lookupScanCredentials(
-			(hudson.model.Item) job,
-			ghConfig.apiUri, ghConfig.credentialsId, ghConfig.repoOwner)
-	return Connector.connect(ghConfig.apiUri, creds)
+private boolean checkGHAWorkflowRuns(Map repoInfo, String sha) {
+	def content = httpRequest(
+			url: "${repoInfo.apiUri}/repos/${repoInfo.repoFullName}/actions/runs?head_sha=${sha}&event=pull_request&per_page=1",
+			validResponseCodes: '200',
+			quiet: true
+	).content
+	def json = new groovy.json.JsonSlurper().parseText(content)
+	return json.total_count > 0
 }
 
 // ---------- Existing methods (unchanged) ----------

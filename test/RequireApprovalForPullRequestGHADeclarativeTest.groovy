@@ -8,57 +8,32 @@
 
 import com.lesfurets.jenkins.unit.declarative.DeclarativePipelineTest
 import hudson.model.Cause
-import hudson.model.Item
 import hudson.model.Result
 import hudson.model.User
-import jenkins.scm.api.SCMSource
-import org.jenkinsci.plugins.github_branch_source.Connector
-import org.jenkinsci.plugins.github_branch_source.GitHubSCMSource
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
 import org.jenkinsci.plugins.workflow.steps.TimeoutStepExecution
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.kohsuke.github.GHCommitPointer
-import org.kohsuke.github.GHEvent
-import org.kohsuke.github.GHPullRequest
-import org.kohsuke.github.GHRepository
-import org.kohsuke.github.GHWorkflowRunQueryBuilder
-import org.kohsuke.github.GitHub
-import org.kohsuke.github.PagedIterable
-import org.kohsuke.github.PagedIterator
 import org.mockito.MockedStatic
 
 import static com.lesfurets.jenkins.unit.global.lib.LibraryConfiguration.library
 import static com.lesfurets.jenkins.unit.global.lib.LocalSource.localSource
 import static org.junit.jupiter.api.Assertions.assertThrows
-import static org.mockito.ArgumentMatchers.any
-import static org.mockito.ArgumentMatchers.anyInt
-import static org.mockito.ArgumentMatchers.anyString
 import static org.mockito.Mockito.*
 
 class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelineTest {
 	private static final SCRIPT_NAME = "RequireApprovalForPullRequestDeclarativePipeline.groovy"
 	static MockedStatic<User> userClassMock
-	static MockedStatic<SCMSource.SourceByItem> sourceByItemMock
-	static MockedStatic<Connector> connectorMock
 
-	GitHub mockGitHub
-	GHRepository mockRepo
-	GHPullRequest mockPR
-	GHCommitPointer mockHead
-	GHWorkflowRunQueryBuilder mockQueryBuilder
-	PagedIterable mockPagedIterable
-	PagedIterator mockIterator
-	GitHubSCMSource mockSCMSource
-	Item mockJob
+	boolean ghaRunsExist = false
+	String prSha = 'abc123'
+	String prUpdatedAt = '2024-01-01T00:00:00Z'
 
 	@BeforeAll
 	static void createStaticMocks() {
 		userClassMock = mockStatic(User)
-		sourceByItemMock = mockStatic(SCMSource.SourceByItem)
-		connectorMock = mockStatic(Connector)
 
 		def fooMock = mock(User)
 		userClassMock.when { User.getById('foo', false) }
@@ -69,8 +44,6 @@ class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelin
 	@AfterAll
 	static void closeStaticMocks() {
 		userClassMock.close()
-		sourceByItemMock.close()
-		connectorMock.close()
 	}
 
 	@Override
@@ -92,52 +65,34 @@ class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelin
 				.build()
 		helper.registerSharedLibrary(library)
 
-		mockGitHub = mock(GitHub)
-		mockRepo = mock(GHRepository)
-		mockPR = mock(GHPullRequest)
-		mockHead = mock(GHCommitPointer)
-		mockQueryBuilder = mock(GHWorkflowRunQueryBuilder)
-		mockPagedIterable = mock(PagedIterable)
-		mockIterator = mock(PagedIterator)
-		mockSCMSource = mock(GitHubSCMSource)
-		mockJob = mock(Item)
-
-		when(mockSCMSource.getCredentialsId()).thenReturn('github-creds')
-		when(mockSCMSource.getApiUri()).thenReturn('https://api.github.com')
-		when(mockSCMSource.getRepoOwner()).thenReturn('hibernate')
-		when(mockSCMSource.getRepository()).thenReturn('hibernate-orm')
-
-		connectorMock.when { Connector.lookupScanCredentials(any(), anyString(), anyString(), anyString()) }
-				.thenReturn(null)
-		connectorMock.when { Connector.connect(anyString(), any()) }
-				.thenReturn(mockGitHub)
-		connectorMock.when { Connector.release(any()) }
-				.then({ })
-
-		when(mockGitHub.getRepository(anyString())).thenReturn(mockRepo)
-		when(mockRepo.getPullRequest(anyInt())).thenReturn(mockPR)
-		when(mockPR.getHead()).thenReturn(mockHead)
-		when(mockHead.getSha()).thenReturn('abc123')
-		when(mockPR.getUpdatedAt()).thenReturn(new Date(1000))
-
-		when(mockRepo.queryWorkflowRuns()).thenReturn(mockQueryBuilder)
-		when(mockQueryBuilder.headSha(anyString())).thenReturn(mockQueryBuilder)
-		when(mockQueryBuilder.event(GHEvent.PULL_REQUEST)).thenReturn(mockQueryBuilder)
-		when(mockQueryBuilder.list()).thenReturn(mockPagedIterable)
-		when(mockPagedIterable.withPageSize(anyInt())).thenReturn(mockPagedIterable)
-		when(mockPagedIterable.iterator()).thenReturn(mockIterator)
+		ghaRunsExist = false
+		prSha = 'abc123'
+		prUpdatedAt = '2024-01-01T00:00:00Z'
 	}
 
 	private void setupPRBuild() {
 		addEnvVar('CHANGE_AUTHOR', 'foo')
 		addEnvVar('CHANGE_ID', '42')
+		addEnvVar('CHANGE_URL', 'https://github.com/hibernate/hibernate-orm/pull/42')
 
 		binding.getVariable('currentBuild').rawBuild = [:]
-		binding.getVariable('currentBuild').rawBuild.parent = mockJob
 		binding.getVariable('currentBuild').rawBuild.getCause = { return null }
 
-		sourceByItemMock.when { SCMSource.SourceByItem.findSource(mockJob) }
-				.thenReturn(mockSCMSource)
+		registerHttpRequestMock()
+	}
+
+	private void registerHttpRequestMock() {
+		helper.registerAllowedMethod("httpRequest", [Map], { Map params ->
+			def url = params.url as String
+			if (url.contains('/actions/runs')) {
+				def count = ghaRunsExist ? 1 : 0
+				return [content: """{"total_count": ${count}, "workflow_runs": []}"""]
+			}
+			if (url.contains('/pulls/')) {
+				return [content: """{"head": {"sha": "${prSha}"}, "updated_at": "${prUpdatedAt}"}"""]
+			}
+			throw new IOException("Unexpected URL: ${url}")
+		})
 	}
 
 	@Override
@@ -153,7 +108,7 @@ class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelin
 	@Test
 	void gha_alreadyApproved() throws Exception {
 		setupPRBuild()
-		when(mockIterator.hasNext()).thenReturn(true)
+		ghaRunsExist = true
 
 		def script = runScript(SCRIPT_NAME)
 		assertJobStatusSuccess()
@@ -164,7 +119,21 @@ class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelin
 	@Test
 	void gha_approvedAfterFirstPoll() throws Exception {
 		setupPRBuild()
-		when(mockIterator.hasNext()).thenReturn(false).thenReturn(true)
+		ghaRunsExist = false
+
+		def ghaCheckCount = 0
+		helper.registerAllowedMethod("httpRequest", [Map], { Map params ->
+			def url = params.url as String
+			if (url.contains('/actions/runs')) {
+				ghaCheckCount++
+				def count = ghaCheckCount >= 2 ? 1 : 0
+				return [content: """{"total_count": ${count}, "workflow_runs": []}"""]
+			}
+			if (url.contains('/pulls/')) {
+				return [content: """{"head": {"sha": "${prSha}"}, "updated_at": "${prUpdatedAt}"}"""]
+			}
+			throw new IOException("Unexpected URL: ${url}")
+		})
 
 		helper.registerAllowedMethod("timeout", [Map, Closure], { Map params, Closure body ->
 			throw new FlowInterruptedException(
@@ -182,7 +151,7 @@ class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelin
 	@Test
 	void gha_manualApproval() throws Exception {
 		setupPRBuild()
-		when(mockIterator.hasNext()).thenReturn(false)
+		ghaRunsExist = false
 
 		helper.registerAllowedMethod("timeout", [Map, Closure], { Map params, Closure body ->
 			body()
@@ -194,16 +163,12 @@ class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelin
 	}
 
 	@Test
-	void gha_notGitHubSCMSource_fallback() throws Exception {
+	void gha_noChangeUrl_fallback() throws Exception {
 		addEnvVar('CHANGE_AUTHOR', 'foo')
 		addEnvVar('CHANGE_ID', '42')
 
 		binding.getVariable('currentBuild').rawBuild = [:]
-		binding.getVariable('currentBuild').rawBuild.parent = mockJob
 		binding.getVariable('currentBuild').rawBuild.getCause = { return null }
-
-		sourceByItemMock.when { SCMSource.SourceByItem.findSource(mockJob) }
-				.thenReturn(null)
 
 		helper.registerAllowedMethod("input", [Map])
 
@@ -215,8 +180,16 @@ class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelin
 
 	@Test
 	void gha_apiError_fallback() throws Exception {
-		setupPRBuild()
-		when(mockRepo.getPullRequest(anyInt())).thenThrow(new IOException("API error"))
+		addEnvVar('CHANGE_AUTHOR', 'foo')
+		addEnvVar('CHANGE_ID', '42')
+		addEnvVar('CHANGE_URL', 'https://github.com/hibernate/hibernate-orm/pull/42')
+
+		binding.getVariable('currentBuild').rawBuild = [:]
+		binding.getVariable('currentBuild').rawBuild.getCause = { return null }
+
+		helper.registerAllowedMethod("httpRequest", [Map], { Map params ->
+			throw new IOException("API error")
+		})
 
 		helper.registerAllowedMethod("input", [Map])
 
@@ -229,7 +202,7 @@ class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelin
 	@Test
 	void gha_userAbort_propagates() throws Exception {
 		setupPRBuild()
-		when(mockIterator.hasNext()).thenReturn(false)
+		ghaRunsExist = false
 
 		helper.registerAllowedMethod("timeout", [Map, Closure], { Map params, Closure body ->
 			throw new FlowInterruptedException(
@@ -251,8 +224,7 @@ class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelin
 	@Test
 	void gha_exponentialBackoff() throws Exception {
 		setupPRBuild()
-		when(mockIterator.hasNext()).thenReturn(false)
-		when(mockPR.getUpdatedAt()).thenReturn(new Date(1000))
+		ghaRunsExist = false
 
 		def timeoutValues = []
 		def callCount = 0
@@ -260,7 +232,6 @@ class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelin
 			timeoutValues << params.time
 			callCount++
 			if (callCount >= 4) {
-				// On the 4th timeout cycle, let manual approval through
 				body()
 				return
 			}
@@ -283,12 +254,22 @@ class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelin
 	@Test
 	void gha_activityResetsBackoff() throws Exception {
 		setupPRBuild()
-		when(mockIterator.hasNext()).thenReturn(false)
-		when(mockPR.getUpdatedAt())
-				.thenReturn(new Date(1000))
-				.thenReturn(new Date(1000))
-				.thenReturn(new Date(2000))
-				.thenReturn(new Date(2000))
+		ghaRunsExist = false
+
+		def prFetchCount = 0
+		helper.registerAllowedMethod("httpRequest", [Map], { Map params ->
+			def url = params.url as String
+			if (url.contains('/actions/runs')) {
+				return [content: '{"total_count": 0, "workflow_runs": []}']
+			}
+			if (url.contains('/pulls/')) {
+				prFetchCount++
+				// updatedAt changes on the 3rd PR fetch (2nd poll)
+				def updatedAt = prFetchCount >= 3 ? '2024-01-02T00:00:00Z' : '2024-01-01T00:00:00Z'
+				return [content: """{"head": {"sha": "abc123"}, "updated_at": "${updatedAt}"}"""]
+			}
+			throw new IOException("Unexpected URL: ${url}")
+		})
 
 		def timeoutValues = []
 		def callCount = 0
@@ -311,7 +292,7 @@ class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelin
 
 		assert timeoutValues[0] == 5
 		assert timeoutValues[1] == 10
-		// updatedAt changed on the 2nd GH check → reset
+		// updatedAt changed on the 2nd poll → reset
 		assert timeoutValues[2] == 5
 		assert timeoutValues[3] == 10
 	}
@@ -319,12 +300,20 @@ class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelin
 	@Test
 	void gha_apiErrorDuringPoll_continues() throws Exception {
 		setupPRBuild()
-		def checkCallCount = 0
-		when(mockIterator.hasNext()).thenAnswer({
-			checkCallCount++
-			if (checkCallCount == 1) return false
-			if (checkCallCount == 2) throw new IOException("transient error")
-			return true
+
+		def ghaCheckCount = 0
+		helper.registerAllowedMethod("httpRequest", [Map], { Map params ->
+			def url = params.url as String
+			if (url.contains('/actions/runs')) {
+				ghaCheckCount++
+				if (ghaCheckCount == 1) return [content: '{"total_count": 0, "workflow_runs": []}']
+				if (ghaCheckCount == 2) throw new IOException("transient error")
+				return [content: '{"total_count": 1, "workflow_runs": []}']
+			}
+			if (url.contains('/pulls/')) {
+				return [content: """{"head": {"sha": "abc123"}, "updated_at": "2024-01-01T00:00:00Z"}"""]
+			}
+			throw new IOException("Unexpected URL: ${url}")
 		})
 
 		def timeoutCallCount = 0
