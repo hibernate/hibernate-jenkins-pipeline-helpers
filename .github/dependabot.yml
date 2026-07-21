@@ -26,3 +26,5 @@ updates:
     ignore:
       # Must be aligned with the version Jenkins uses; see comment in pom.xml.
       - dependency-name: "org.codehaus.groovy:*"
+      # Newer versions require a Groovy version newer than what Jenkins uses; see comment in pom.xml.
+      - dependency-name: "org.codehaus.gmavenplus:gmavenplus-plugin"

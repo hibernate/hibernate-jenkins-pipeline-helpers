@@ -190,6 +190,10 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--
+                Newer versions require a Groovy version newer than what Jenkins uses.
+                Do not update without checking compatibility with the Groovy version above.
+            -->
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
