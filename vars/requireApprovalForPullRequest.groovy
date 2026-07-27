@@ -168,11 +168,7 @@ private boolean doCheckGHAWorkflowRuns(Map ghConfig, String sha) {
 		def executedConclusions = [
 				GHWorkflowRun.Conclusion.SUCCESS,
 				GHWorkflowRun.Conclusion.FAILURE,
-				GHWorkflowRun.Conclusion.CANCELLED,
 				GHWorkflowRun.Conclusion.TIMED_OUT,
-				GHWorkflowRun.Conclusion.NEUTRAL,
-				GHWorkflowRun.Conclusion.STALE,
-				GHWorkflowRun.Conclusion.SKIPPED,
 		] as Set
 		while (iterator.hasNext()) {
 			def run = iterator.next()
