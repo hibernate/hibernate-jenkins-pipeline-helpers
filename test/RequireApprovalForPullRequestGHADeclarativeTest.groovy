@@ -129,9 +129,9 @@ class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelin
 		when(mockPagedIterable.iterator()).thenReturn(mockIterator)
 	}
 
-	private GHWorkflowRun mockWorkflowRun(GHWorkflowRun.Status status) {
+	private GHWorkflowRun mockWorkflowRun(GHWorkflowRun.Conclusion conclusion) {
 		def run = mock(GHWorkflowRun)
-		when(run.getStatus()).thenReturn(status)
+		when(run.getConclusion()).thenReturn(conclusion)
 		return run
 	}
 
@@ -160,7 +160,7 @@ class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelin
 	@Test
 	void gha_alreadyApproved() throws Exception {
 		setupPRBuild()
-		def approvedRun = mockWorkflowRun(GHWorkflowRun.Status.COMPLETED)
+		def approvedRun = mockWorkflowRun(GHWorkflowRun.Conclusion.SUCCESS)
 		when(mockIterator.hasNext()).thenReturn(true).thenReturn(false)
 		when(mockIterator.next()).thenReturn(approvedRun)
 
@@ -173,7 +173,7 @@ class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelin
 	@Test
 	void gha_actionRequired_notApproved() throws Exception {
 		setupPRBuild()
-		def pendingRun = mockWorkflowRun(GHWorkflowRun.Status.ACTION_REQUIRED)
+		def pendingRun = mockWorkflowRun(GHWorkflowRun.Conclusion.ACTION_REQUIRED)
 		when(mockIterator.hasNext()).thenReturn(true).thenReturn(false)
 		when(mockIterator.next()).thenReturn(pendingRun)
 
@@ -190,7 +190,7 @@ class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelin
 	@Test
 	void gha_approvedAfterFirstPoll() throws Exception {
 		setupPRBuild()
-		def approvedRun = mockWorkflowRun(GHWorkflowRun.Status.IN_PROGRESS)
+		def approvedRun = mockWorkflowRun(null)
 		when(mockIterator.hasNext()).thenReturn(false).thenReturn(true).thenReturn(false)
 		when(mockIterator.next()).thenReturn(approvedRun)
 
@@ -355,7 +355,7 @@ class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelin
 			if (checkCallCount == 3) return true
 			return false
 		})
-		def approvedRun = mockWorkflowRun(GHWorkflowRun.Status.COMPLETED)
+		def approvedRun = mockWorkflowRun(GHWorkflowRun.Conclusion.SUCCESS)
 		when(mockIterator.next()).thenReturn(approvedRun)
 
 		def timeoutCallCount = 0

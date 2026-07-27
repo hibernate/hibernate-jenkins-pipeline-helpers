@@ -166,7 +166,8 @@ private boolean doCheckGHAWorkflowRuns(Map ghConfig, String sha) {
 				.withPageSize(10)
 				.iterator()
 		while (iterator.hasNext()) {
-			if (iterator.next().getStatus() != GHWorkflowRun.Status.ACTION_REQUIRED) {
+			def run = iterator.next()
+			if (run.getConclusion() != GHWorkflowRun.Conclusion.ACTION_REQUIRED) {
 				return true
 			}
 		}
