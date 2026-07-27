@@ -129,8 +129,9 @@ class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelin
 		when(mockPagedIterable.iterator()).thenReturn(mockIterator)
 	}
 
-	private GHWorkflowRun mockWorkflowRun(GHWorkflowRun.Conclusion conclusion) {
+	private GHWorkflowRun mockWorkflowRun(GHWorkflowRun.Status status, GHWorkflowRun.Conclusion conclusion) {
 		def run = mock(GHWorkflowRun)
+		when(run.getStatus()).thenReturn(status)
 		when(run.getConclusion()).thenReturn(conclusion)
 		return run
 	}
@@ -160,7 +161,7 @@ class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelin
 	@Test
 	void gha_alreadyApproved() throws Exception {
 		setupPRBuild()
-		def approvedRun = mockWorkflowRun(GHWorkflowRun.Conclusion.SUCCESS)
+		def approvedRun = mockWorkflowRun(GHWorkflowRun.Status.COMPLETED, GHWorkflowRun.Conclusion.SUCCESS)
 		when(mockIterator.hasNext()).thenReturn(true).thenReturn(false)
 		when(mockIterator.next()).thenReturn(approvedRun)
 
@@ -171,9 +172,22 @@ class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelin
 	}
 
 	@Test
+	void gha_inProgress_approved() throws Exception {
+		setupPRBuild()
+		def inProgressRun = mockWorkflowRun(GHWorkflowRun.Status.IN_PROGRESS, null)
+		when(mockIterator.hasNext()).thenReturn(true).thenReturn(false)
+		when(mockIterator.next()).thenReturn(inProgressRun)
+
+		def script = runScript(SCRIPT_NAME)
+		assertJobStatusSuccess()
+		assertCallStack().contains('Approved: GitHub Actions workflow runs found')
+		assertCallStack().doesNotContain('Approval is required')
+	}
+
+	@Test
 	void gha_actionRequired_notApproved() throws Exception {
 		setupPRBuild()
-		def pendingRun = mockWorkflowRun(GHWorkflowRun.Conclusion.ACTION_REQUIRED)
+		def pendingRun = mockWorkflowRun(GHWorkflowRun.Status.COMPLETED, GHWorkflowRun.Conclusion.ACTION_REQUIRED)
 		when(mockIterator.hasNext()).thenReturn(true).thenReturn(false)
 		when(mockIterator.next()).thenReturn(pendingRun)
 
@@ -190,7 +204,7 @@ class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelin
 	@Test
 	void gha_approvedAfterFirstPoll() throws Exception {
 		setupPRBuild()
-		def approvedRun = mockWorkflowRun(null)
+		def approvedRun = mockWorkflowRun(GHWorkflowRun.Status.COMPLETED, GHWorkflowRun.Conclusion.SUCCESS)
 		when(mockIterator.hasNext()).thenReturn(false).thenReturn(true).thenReturn(false)
 		when(mockIterator.next()).thenReturn(approvedRun)
 
@@ -355,7 +369,7 @@ class RequireApprovalForPullRequestGHADeclarativeTest extends DeclarativePipelin
 			if (checkCallCount == 3) return true
 			return false
 		})
-		def approvedRun = mockWorkflowRun(GHWorkflowRun.Conclusion.SUCCESS)
+		def approvedRun = mockWorkflowRun(GHWorkflowRun.Status.COMPLETED, GHWorkflowRun.Conclusion.SUCCESS)
 		when(mockIterator.next()).thenReturn(approvedRun)
 
 		def timeoutCallCount = 0

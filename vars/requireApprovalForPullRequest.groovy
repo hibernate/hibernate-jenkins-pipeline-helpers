@@ -165,9 +165,23 @@ private boolean doCheckGHAWorkflowRuns(Map ghConfig, String sha) {
 				.list()
 				.withPageSize(10)
 				.iterator()
+		def executedConclusions = [
+				GHWorkflowRun.Conclusion.SUCCESS,
+				GHWorkflowRun.Conclusion.FAILURE,
+				GHWorkflowRun.Conclusion.CANCELLED,
+				GHWorkflowRun.Conclusion.TIMED_OUT,
+				GHWorkflowRun.Conclusion.NEUTRAL,
+				GHWorkflowRun.Conclusion.STALE,
+				GHWorkflowRun.Conclusion.SKIPPED,
+		] as Set
 		while (iterator.hasNext()) {
 			def run = iterator.next()
-			if (run.getConclusion() != GHWorkflowRun.Conclusion.ACTION_REQUIRED) {
+			def status = run.getStatus()
+			if (status == GHWorkflowRun.Status.IN_PROGRESS
+					|| status == GHWorkflowRun.Status.QUEUED) {
+				return true
+			}
+			if (executedConclusions.contains(run.getConclusion())) {
 				return true
 			}
 		}
