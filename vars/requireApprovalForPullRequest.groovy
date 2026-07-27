@@ -177,8 +177,7 @@ private boolean doCheckGHAWorkflowRuns(Map ghConfig, String sha) {
 		while (iterator.hasNext()) {
 			def run = iterator.next()
 			def status = run.getStatus()
-			if (status == GHWorkflowRun.Status.IN_PROGRESS
-					|| status == GHWorkflowRun.Status.QUEUED) {
+			if (status == GHWorkflowRun.Status.IN_PROGRESS) {
 				return true
 			}
 			if (executedConclusions.contains(run.getConclusion())) {
