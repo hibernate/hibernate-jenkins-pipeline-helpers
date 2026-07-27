@@ -24,10 +24,22 @@ The approval is skipped if:
 * the pull request was submitted by a member of the given user group.
 * the build was triggered explicitly by a member of the given user group. 
 
+For GitHub repositories that also use GitHub Actions,
+the step automatically detects approved GHA workflow runs for the same commit
+and auto-approves the Jenkins build.
+It polls the GitHub API with exponential backoff (5 min → 160 min, reset on PR activity),
+falling back to manual approval on any error.
+
+This feature requires the library to be
+[trusted (not sandboxed)](https://www.jenkins.io/doc/book/pipeline/shared-libraries/#global-shared-libraries).
+
 Usage:
 
 ```groovy
 requireApprovalForPullRequest 'hibernate'
+
+// Optional: customize backoff intervals (in minutes)
+requireApprovalForPullRequest 'hibernate', [initialInputTimeoutMinutes: 5, maxInputTimeoutMinutes: 160]
 ```
 
 ### notifyBuildResult
@@ -86,6 +98,7 @@ so that we can set the (default) version globally [here](https://ci.hibernate.or
  - https://plugins.jenkins.io/config-file-provider
  - https://plugins.jenkins.io/pipeline-utility-steps for YAML reading
  - https://plugins.jenkins.io/notification for Gitter notifications
+ - https://plugins.jenkins.io/github-branch-source for GHA auto-approval in `requireApprovalForPullRequest`
 
 ### Script approval
 
