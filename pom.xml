@@ -248,7 +248,7 @@
                     <failIfNoTests>true</failIfNoTests>
                     <trimStackTrace>false</trimStackTrace>
                     <includes>
-                        <include>**/*Test.class</include>
+                        <include>**/*Test</include>
                     </includes>
                     <!-- Mockito agent for mocking of static methods -->
                     <!-- See https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.3 -->
